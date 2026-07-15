@@ -52,9 +52,10 @@ async function githubSha(repoPath: string): Promise<string | undefined> {
   return existing?.sha;
 }
 
-async function localCommitPush(message: string): Promise<string> {
+async function localCommitPush(message: string, repoPaths: string[]): Promise<string> {
   const cwd = process.cwd();
-  await exec("git", ["add", "-A"], { cwd });
+  // Stage only what the CMS touched — never sweep up unrelated local edits.
+  await exec("git", ["add", "--", ...repoPaths], { cwd });
   await exec("git", ["commit", "-m", `${message}\n\nPublished via Gambitive CMS`], { cwd });
   try {
     await exec("git", ["push"], { cwd });
@@ -88,7 +89,7 @@ export async function saveFiles(files: FileToSave[], message: string): Promise<s
     fs.mkdirSync(path.dirname(abs), { recursive: true });
     fs.writeFileSync(abs, file.content);
   }
-  return localCommitPush(message);
+  return localCommitPush(message, files.map((f) => f.repoPath));
 }
 
 export async function deleteFile(repoPath: string, message: string): Promise<string> {
@@ -103,5 +104,5 @@ export async function deleteFile(repoPath: string, message: string): Promise<str
   }
   const abs = path.join(process.cwd(), repoPath);
   if (fs.existsSync(abs)) fs.unlinkSync(abs);
-  return localCommitPush(message);
+  return localCommitPush(message, [repoPath]);
 }
