@@ -48,15 +48,45 @@ const articles = (
           is where new pieces land first.
         </p>
       ) : (
-        <div class="archive-list">
-          {articles.map((article) => (
-            <ArticleCard article={article} showSection={false} />
-          ))}
-        </div>
+        <>
+          <div class="archive-grid" data-page-size="9">
+            {articles.map((article) => (
+              <ArticleCard article={article} showSection={false} />
+            ))}
+          </div>
+          <div class="more-row">
+            <button type="button" class="btn view-more" hidden>
+              View More
+            </button>
+          </div>
+        </>
       )
     }
   </div>
 </BaseLayout>
+
+<script>
+  // Progressive reveal: 9 posts (3 rows of 3) per batch. Without JS the
+  // full list stays visible, so nothing is ever unreachable.
+  const grid = document.querySelector<HTMLElement>(".archive-grid");
+  const button = document.querySelector<HTMLButtonElement>(".view-more");
+  if (grid && button) {
+    const pageSize = Number(grid.dataset.pageSize) || 9;
+    const cards = Array.from(grid.children) as HTMLElement[];
+    let shown = pageSize;
+    const update = () => {
+      cards.forEach((card, i) => card.toggleAttribute("hidden", i >= shown));
+      button.hidden = shown >= cards.length;
+    };
+    button.addEventListener("click", () => {
+      shown += pageSize;
+      update();
+      // Keep keyboard/screen-reader position sensible after the reveal
+      cards[shown - pageSize]?.querySelector("a")?.focus();
+    });
+    update();
+  }
+</script>
 
 <style>
   .archive-header {
@@ -89,16 +119,34 @@ const articles = (
     font-size: var(--size-small);
     color: var(--text-secondary);
   }
-  .archive-list {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-6);
-    max-width: 46rem;
-    padding-bottom: var(--space-7);
+  .archive-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-7) var(--space-6);
+    padding-bottom: var(--space-6);
   }
-  .archive-list > :global(article:not(:first-child)) {
-    border-top: 1px solid var(--border);
-    padding-top: var(--space-6);
+  @media (max-width: 64rem) {
+    .archive-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 40rem) {
+    .archive-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  /* Author styles on .card would beat the UA [hidden] rule */
+  .archive-grid > :global([hidden]) {
+    display: none !important;
+  }
+  .more-row {
+    display: flex;
+    justify-content: center;
+    padding-bottom: var(--space-8);
+  }
+  /* .btn's display would beat the UA [hidden] rule, same as the cards */
+  .view-more[hidden] {
+    display: none !important;
   }
   .empty {
     color: var(--text-secondary);
