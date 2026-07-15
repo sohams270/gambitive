@@ -43,6 +43,29 @@ For the signature pull-quote card inside an article:
 </figure>
 ```
 
+## CMS (/admin)
+
+Authors publish from `/admin` — no terminal needed. Log in at `/admin/login`.
+
+- **Content**: every post (live, featured, draft) with edit links.
+- **New Post**: headline, dek, section, byline, TL;DR, feature image upload,
+  Markdown body, featured/draft flags. Publishing writes the Markdown file and
+  commits it: locally via git push, on Vercel via the GitHub API. Either way
+  the deploy pipeline takes it live in about a minute.
+- **Edit**: update or delete any post (delete requires typing the slug).
+- **Authors** (super admin only): add authors who can publish and edit.
+
+Users live in `src/data/users.json` (scrypt-hashed passwords — never commit a
+plaintext password). Sessions are HMAC-signed cookies.
+
+**Production env vars (Vercel → Settings → Environment Variables):**
+`SESSION_SECRET` (any long random string) and `GITHUB_TOKEN` (fine-grained PAT,
+Contents read/write on this repo only). See `.env.example`.
+
+**Security note:** if this repo is public, password *hashes* in users.json are
+public too. Make the repo private (GitHub → Settings → General → Danger Zone →
+Change visibility) — Vercel keeps deploying private repos fine.
+
 ## Before going live — placeholders to replace
 
 All in `src/lib/site.ts`:
