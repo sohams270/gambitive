@@ -83,10 +83,11 @@ const user = Astro.locals.user;
   </div>
 
   <div class="field">
-    <label for="body">Body (Markdown)</label>
+    <label for="body">Body</label>
     <p class="hint">
-      Standard Markdown. Pull-quote card:
-      &lt;figure class="quote-card"&gt;&lt;blockquote&gt;Quote.&lt;/blockquote&gt;&lt;figcaption&gt;Name, Company&lt;/figcaption&gt;&lt;/figure&gt;
+      Use the toolbar to format — it writes clean Markdown underneath. The
+      "❝" button inserts the Gambitive pull-quote card. Eye icon previews,
+      arrows go fullscreen.
     </p>
     <textarea id="body" name="body" rows="22" required>{values.body ?? ""}</textarea>
   </div>
@@ -100,3 +101,92 @@ const user = Astro.locals.user;
     <button type="submit" class="btn" name="intent" value="save">{submitLabel}</button>
   </div>
 </form>
+
+<script>
+  import EasyMDE from "easymde";
+  import "easymde/dist/easymde.min.css";
+  import "@fortawesome/fontawesome-free/css/all.min.css";
+
+  const textarea = document.getElementById("body") as HTMLTextAreaElement | null;
+  if (textarea) {
+    // The editor takes over rendering; drop `required` so the hidden
+    // textarea can't block submission from an unfocusable state.
+    textarea.required = false;
+
+    const editor = new EasyMDE({
+      element: textarea,
+      autoDownloadFontAwesome: false,
+      spellChecker: false,
+      status: ["lines", "words"],
+      minHeight: "420px",
+      toolbar: [
+        "bold",
+        "italic",
+        "strikethrough",
+        "heading-2",
+        "heading-3",
+        "|",
+        "quote",
+        {
+          name: "quote-card",
+          action: (mde) => {
+            const cm = mde.codemirror;
+            cm.replaceSelection(
+              '\n<figure class="quote-card">\n  <blockquote>The quote.</blockquote>\n  <figcaption>Name, Company</figcaption>\n</figure>\n',
+            );
+            cm.focus();
+          },
+          className: "fa fa-quote-right",
+          title: "Insert Gambitive quote card",
+        },
+        "unordered-list",
+        "ordered-list",
+        "table",
+        "horizontal-rule",
+        "|",
+        "link",
+        "image",
+        "code",
+        "|",
+        "preview",
+        "side-by-side",
+        "fullscreen",
+        "|",
+        "guide",
+      ],
+    });
+
+    // Guarantee the textarea carries the editor content on submit.
+    textarea.closest("form")?.addEventListener("submit", (event) => {
+      const value = editor.value().trim();
+      textarea.value = value;
+      if (!value) {
+        event.preventDefault();
+        alert("The body is empty.");
+      }
+    });
+  }
+</script>
+
+<style is:global>
+  /* Blend EasyMDE into the admin design system */
+  .EasyMDEContainer .editor-toolbar {
+    border-color: var(--border);
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: var(--bg-muted);
+  }
+  .EasyMDEContainer .CodeMirror {
+    border-color: var(--border);
+    border-radius: 0 0 var(--radius) var(--radius);
+    font-size: var(--size-small);
+    line-height: 1.6;
+  }
+  .EasyMDEContainer .editor-toolbar button.active,
+  .EasyMDEContainer .editor-toolbar button:hover {
+    background: var(--accent-tint);
+    border-color: var(--accent);
+  }
+  .EasyMDEContainer .editor-statusbar {
+    color: var(--text-secondary);
+  }
+</style>
