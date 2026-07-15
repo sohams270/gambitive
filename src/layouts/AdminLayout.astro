@@ -1,0 +1,194 @@
+---
+import "@fontsource-variable/fraunces";
+import "@fontsource-variable/inter";
+import "../styles/global.css";
+import BrandMark from "../components/BrandMark.astro";
+
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+const user = Astro.locals.user;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{title} — Gambitive CMS</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <header class="admin-header">
+      <div class="wrap bar">
+        <a href="/admin/" class="wordmark">
+          <BrandMark size={13} class="mark" />
+          Gambitive <span>CMS</span>
+        </a>
+        {
+          user && (
+            <nav class="admin-nav" aria-label="CMS">
+              <a href="/admin/">Content</a>
+              <a href="/admin/new/">New Post</a>
+              {user.role === "superadmin" && <a href="/admin/authors/">Authors</a>}
+              <a href="/" target="_blank" rel="noopener">View Site ↗</a>
+              <form method="post" action="/admin/logout">
+                <button type="submit" class="linkish">
+                  Log out ({user.username})
+                </button>
+              </form>
+            </nav>
+          )
+        }
+      </div>
+    </header>
+    <main class="wrap admin-main">
+      <slot />
+    </main>
+  </body>
+</html>
+
+<style is:global>
+  .admin-header {
+    background: var(--accent);
+    color: var(--white);
+  }
+  .admin-header .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding-block: var(--space-3);
+    flex-wrap: wrap;
+  }
+  .admin-header .wordmark {
+    font-family: var(--font-serif);
+    font-weight: 680;
+    font-size: 1.25rem;
+    color: var(--white);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .admin-header .wordmark span {
+    font-family: var(--font-sans);
+    font-size: var(--size-meta);
+    font-weight: 600;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    opacity: 0.7;
+    align-self: center;
+  }
+  .admin-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+  }
+  .admin-nav a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: var(--size-small);
+    font-weight: 500;
+  }
+  .admin-nav a:hover {
+    color: var(--white);
+  }
+  .admin-nav .linkish {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: var(--size-small);
+    cursor: pointer;
+    padding: 0;
+  }
+  .admin-nav .linkish:hover {
+    color: var(--white);
+  }
+  .admin-header a:focus-visible,
+  .admin-header button:focus-visible {
+    outline-color: var(--white);
+  }
+  .admin-main {
+    padding-block: var(--space-7);
+    width: 100%;
+  }
+
+  /* Shared admin form styles */
+  .admin-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    max-width: 46rem;
+  }
+  .admin-form .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .admin-form label {
+    font-weight: 600;
+    font-size: var(--size-small);
+  }
+  .admin-form .hint {
+    font-size: var(--size-meta);
+    color: var(--text-secondary);
+    margin: 0;
+  }
+  .admin-form input[type="text"],
+  .admin-form input[type="password"],
+  .admin-form input[type="date"],
+  .admin-form input[type="file"],
+  .admin-form textarea,
+  .admin-form select {
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--white);
+    font-size: var(--size-small);
+    width: 100%;
+  }
+  .admin-form textarea {
+    resize: vertical;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    line-height: 1.6;
+  }
+  .admin-form .row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-4);
+  }
+  .admin-form .checks {
+    display: flex;
+    gap: var(--space-6);
+    align-items: center;
+  }
+  .admin-form .checks label {
+    display: inline-flex;
+    gap: var(--space-2);
+    align-items: center;
+    font-weight: 500;
+  }
+  .notice {
+    border-radius: var(--radius);
+    padding: var(--space-4) var(--space-5);
+    font-size: var(--size-small);
+    max-width: 46rem;
+    margin-bottom: var(--space-5);
+  }
+  .notice--ok {
+    background: var(--accent-tint);
+    border: 1px solid var(--accent);
+  }
+  .notice--err {
+    background: #fbeeee;
+    border: 1px solid #b3564d;
+  }
+  .admin-h1 {
+    font-size: var(--size-h2);
+    margin-bottom: var(--space-5);
+  }
+</style>

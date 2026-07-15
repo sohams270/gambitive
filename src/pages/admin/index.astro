@@ -1,0 +1,138 @@
+---
+import { getCollection } from "astro:content";
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import FormattedDate from "../../components/FormattedDate.astro";
+import { SECTIONS } from "../../lib/site";
+
+export const prerender = false;
+
+const articles = (await getCollection("articles")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+const drafts = articles.filter((a) => a.data.draft).length;
+---
+
+<AdminLayout title="Content">
+  <div class="head">
+    <div>
+      <h1 class="admin-h1">Content</h1>
+      <p class="meta">
+        {articles.length} posts · {articles.length - drafts} live · {drafts} drafts.
+        Newly published posts appear here once their deploy finishes (~1 min).
+      </p>
+    </div>
+    <a href="/admin/new/" class="btn">+ New Post</a>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Headline</th>
+          <th>Section</th>
+          <th>Byline</th>
+          <th>Date</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          articles.map((a) => (
+            <tr>
+              <td class="title-cell">
+                <a href={`/admin/edit/${a.id}/`}>{a.data.title}</a>
+              </td>
+              <td>{SECTIONS[a.data.section].name}</td>
+              <td>{a.data.author}</td>
+              <td>
+                <FormattedDate date={a.data.pubDate} />
+              </td>
+              <td>
+                {a.data.draft ? (
+                  <span class="badge badge--draft">Draft</span>
+                ) : a.data.featured ? (
+                  <span class="badge badge--feat">Featured</span>
+                ) : (
+                  <span class="badge badge--live">Live</span>
+                )}
+              </td>
+              <td>
+                {!a.data.draft && (
+                  <a
+                    href={`/${SECTIONS[a.data.section].slug}/${a.id}/`}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    View ↗
+                  </a>
+                )}
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+</AdminLayout>
+
+<style>
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-6);
+  }
+  .table-wrap {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--size-small);
+  }
+  th {
+    text-align: left;
+    font-size: var(--size-meta);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-meta);
+    color: var(--text-secondary);
+    padding: var(--space-3) var(--space-4) var(--space-3) 0;
+    border-bottom: 2px solid var(--accent);
+  }
+  td {
+    padding: var(--space-4) var(--space-4) var(--space-4) 0;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  .title-cell a {
+    color: var(--text-primary);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .title-cell a:hover {
+    color: var(--accent);
+  }
+  .badge {
+    font-size: var(--size-meta);
+    font-weight: 600;
+    padding: 2px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .badge--live {
+    background: var(--accent-tint);
+    color: var(--accent);
+  }
+  .badge--feat {
+    background: var(--accent);
+    color: var(--white);
+  }
+  .badge--draft {
+    background: var(--bg-muted);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+  }
+</style>

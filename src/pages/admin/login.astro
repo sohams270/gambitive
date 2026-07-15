@@ -1,0 +1,57 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import {
+  loadUsers,
+  verifyPassword,
+  createSessionValue,
+  sessionCookie,
+  isConfigured,
+} from "../../lib/cms/auth";
+
+export const prerender = false;
+
+let error = "";
+
+if (!isConfigured()) {
+  error =
+    "SESSION_SECRET is not set. Add it in Vercel → Project → Settings → Environment Variables (any long random string), then redeploy.";
+} else if (Astro.request.method === "POST") {
+  const form = await Astro.request.formData();
+  const username = String(form.get("username") ?? "").trim().toLowerCase();
+  const password = String(form.get("password") ?? "");
+  const user = loadUsers().find((u) => u.username === username);
+  if (user && password && verifyPassword(user, password)) {
+    Astro.cookies.set(sessionCookie.name, createSessionValue(user.username), sessionCookie.options);
+    return Astro.redirect("/admin/");
+  }
+  error = "Wrong username or password.";
+}
+---
+
+<AdminLayout title="Log in">
+  <div class="login-box">
+    <h1 class="admin-h1">Log in to the newsroom</h1>
+    {error && <p class="notice notice--err">{error}</p>}
+    <form method="post" class="admin-form">
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" required autocomplete="username" autofocus />
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required autocomplete="current-password" />
+      </div>
+      <div>
+        <button type="submit" class="btn">Log in</button>
+      </div>
+    </form>
+  </div>
+</AdminLayout>
+
+<style>
+  .login-box {
+    max-width: 24rem;
+    margin-inline: auto;
+    padding-block: var(--space-8);
+  }
+</style>

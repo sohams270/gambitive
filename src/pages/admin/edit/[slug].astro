@@ -1,0 +1,133 @@
+---
+import { getCollection } from "astro:content";
+import AdminLayout from "../../../layouts/AdminLayout.astro";
+import ArticleForm from "../../../components/admin/ArticleForm.astro";
+import { parseArticleForm } from "../../../lib/cms/article-form";
+import { toMarkdown } from "../../../lib/cms/markdown";
+import { saveFiles, deleteFile, type FileToSave } from "../../../lib/cms/store";
+import { SECTIONS } from "../../../lib/site";
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+const articles = await getCollection("articles");
+const article = articles.find((a) => a.id === slug);
+
+if (!article) {
+  return new Response(
+    "Post not found. If it was published in the last minute or two, the deploy that includes it may still be running — try again shortly.",
+    { status: 404 },
+  );
+}
+
+let error = "";
+let success = "";
+let deleted = false;
+
+let values: Record<string, any> = {
+  ...article.data,
+  pubDate: article.data.pubDate.toISOString().slice(0, 10),
+  body: article.body ?? "",
+};
+
+if (Astro.request.method === "POST") {
+  try {
+    const form = await Astro.request.formData();
+
+    if (form.get("intent") === "delete") {
+      if (form.get("confirm_slug") !== slug) {
+        error = `To delete, type the slug exactly: ${slug}`;
+      } else {
+        success = await deleteFile(
+          `src/content/articles/${slug}.md`,
+          `Delete: ${article.data.title}`,
+        );
+        deleted = true;
+      }
+    } else {
+      const parsed = await parseArticleForm(form, article.data.image);
+      values = parsed.input;
+      if (parsed.error) {
+        error = parsed.error;
+      } else {
+        const files: FileToSave[] = [];
+        if (parsed.imageFile) {
+          const imagePath = `public/images/articles/${slug}.${parsed.imageFile.ext}`;
+          files.push({ repoPath: imagePath, content: parsed.imageFile.buffer });
+          parsed.input.image = `/images/articles/${slug}.${parsed.imageFile.ext}`;
+        }
+        files.push({
+          repoPath: `src/content/articles/${slug}.md`,
+          content: toMarkdown(parsed.input as any),
+        });
+        success = await saveFiles(files, `Update: ${parsed.input.title}`);
+      }
+    }
+  } catch (e) {
+    error = e instanceof Error ? e.message : String(e);
+  }
+}
+
+const viewUrl = `/${SECTIONS[article.data.section].slug}/${slug}/`;
+---
+
+<AdminLayout title={`Edit: ${article.data.title}`}>
+  <h1 class="admin-h1">Edit post</h1>
+  <p class="meta" style="margin-bottom: var(--space-5);">
+    Slug: {slug} · <a href={viewUrl} target="_blank" rel="noopener">View on site ↗</a>
+  </p>
+  {error && <p class="notice notice--err">{error}</p>}
+  {
+    success && (
+      <p class="notice notice--ok">
+        <strong>{deleted ? "Deleted." : "Saved."}</strong> {success}{" "}
+        <a href="/admin/">Back to content</a>
+      </p>
+    )
+  }
+  {
+    !deleted && (
+      <>
+        <ArticleForm values={values} submitLabel="Save changes" />
+
+        <details class="danger">
+          <summary>Delete this post</summary>
+          <form method="post" class="admin-form" style="margin-top: var(--space-4);">
+            <div class="field">
+              <label for="confirm_slug">
+                Type the slug (<code>{slug}</code>) to confirm deletion
+              </label>
+              <input id="confirm_slug" name="confirm_slug" type="text" autocomplete="off" />
+            </div>
+            <div>
+              <button type="submit" name="intent" value="delete" class="btn btn--danger">
+                Delete permanently
+              </button>
+            </div>
+          </form>
+        </details>
+      </>
+    )
+  }
+</AdminLayout>
+
+<style>
+  .danger {
+    margin-top: var(--space-8);
+    border-top: 1px solid var(--border);
+    padding-top: var(--space-5);
+    max-width: 46rem;
+  }
+  .danger summary {
+    cursor: pointer;
+    color: #a03c32;
+    font-size: var(--size-small);
+    font-weight: 600;
+  }
+  .btn--danger {
+    background: #a03c32;
+  }
+  .btn--danger:hover {
+    background: #7f2f27;
+  }
+</style>

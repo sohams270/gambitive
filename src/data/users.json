@@ -1,0 +1,9 @@
+[
+  {
+    "username": "soham",
+    "name": "Soham",
+    "role": "superadmin",
+    "salt": "6e4b445e3f8cb5902e5955076d99517e",
+    "passwordHash": "96f832dbe4af7eaf48dc7ce922524b5aca280f7c740dcc41e5f13dc3bec5a6a4af17393a782683d5051577564b3d56b0fe28a0110aec2d9846710fe467fbf77d"
+  }
+]

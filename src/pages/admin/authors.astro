@@ -1,0 +1,141 @@
+---
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import { loadUsers, hashPassword, type CmsUser } from "../../lib/cms/auth";
+import { saveFiles } from "../../lib/cms/store";
+
+export const prerender = false;
+
+const me = Astro.locals.user;
+if (!me || me.role !== "superadmin") {
+  return Astro.redirect("/admin/");
+}
+
+let error = "";
+let success = "";
+
+if (Astro.request.method === "POST") {
+  try {
+    const form = await Astro.request.formData();
+    const name = String(form.get("name") ?? "").trim();
+    const username = String(form.get("username") ?? "").trim().toLowerCase();
+    const password = String(form.get("password") ?? "");
+    const bio = String(form.get("bio") ?? "").trim();
+
+    if (!name || !username || !password) {
+      error = "Name, username, and password are required.";
+    } else if (!/^[a-z0-9_-]{3,24}$/.test(username)) {
+      error = "Username: 3–24 chars, lowercase letters, numbers, - or _.";
+    } else if (password.length < 10) {
+      error = "Password must be at least 10 characters.";
+    } else if (loadUsers().some((u) => u.username === username)) {
+      error = `Username "${username}" already exists.`;
+    } else {
+      const users = loadUsers();
+      const newUser: CmsUser = {
+        username,
+        name,
+        role: "author",
+        ...hashPassword(password),
+        ...(bio ? { bio } : {}),
+      };
+      users.push(newUser);
+      success = await saveFiles(
+        [{ repoPath: "src/data/users.json", content: JSON.stringify(users, null, 2) + "\n" }],
+        `Add author: ${name}`,
+      );
+      success = `Author "${name}" added. ${success} They can log in at /admin/login once the deploy finishes.`;
+    }
+  } catch (e) {
+    error = e instanceof Error ? e.message : String(e);
+  }
+}
+
+const users = loadUsers();
+---
+
+<AdminLayout title="Authors">
+  <h1 class="admin-h1">Authors</h1>
+  {error && <p class="notice notice--err">{error}</p>}
+  {success && <p class="notice notice--ok">{success}</p>}
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Name</th><th>Username</th><th>Role</th></tr>
+      </thead>
+      <tbody>
+        {
+          users.map((u) => (
+            <tr>
+              <td>{u.name}</td>
+              <td>{u.username}</td>
+              <td>{u.role === "superadmin" ? "Super admin" : "Author"}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <h2 class="sub">Add an author</h2>
+  <p class="meta note">
+    Authors can publish and edit content. Only the super admin manages authors.
+  </p>
+  <form method="post" class="admin-form">
+    <div class="row">
+      <div class="field">
+        <label for="name">Full name</label>
+        <input id="name" name="name" type="text" required />
+      </div>
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" required autocomplete="off" />
+      </div>
+    </div>
+    <div class="field">
+      <label for="password">Password</label>
+      <p class="hint">At least 10 characters. Share it with the author over a secure channel.</p>
+      <input id="password" name="password" type="password" required autocomplete="new-password" />
+    </div>
+    <div class="field">
+      <label for="bio">Default author bio (optional)</label>
+      <input id="bio" name="bio" type="text" />
+    </div>
+    <div>
+      <button type="submit" class="btn">Add author</button>
+    </div>
+  </form>
+</AdminLayout>
+
+<style>
+  .table-wrap {
+    overflow-x: auto;
+    max-width: 46rem;
+    margin-bottom: var(--space-7);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--size-small);
+  }
+  th {
+    text-align: left;
+    font-size: var(--size-meta);
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-meta);
+    color: var(--text-secondary);
+    padding: var(--space-3) var(--space-4) var(--space-3) 0;
+    border-bottom: 2px solid var(--accent);
+  }
+  td {
+    padding: var(--space-3) var(--space-4) var(--space-3) 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .sub {
+    font-size: var(--size-h3);
+    margin-bottom: var(--space-2);
+  }
+  .note {
+    margin-bottom: var(--space-4);
+  }
+</style>

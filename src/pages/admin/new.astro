@@ -1,0 +1,65 @@
+---
+import { getCollection } from "astro:content";
+import AdminLayout from "../../layouts/AdminLayout.astro";
+import ArticleForm from "../../components/admin/ArticleForm.astro";
+import { parseArticleForm } from "../../lib/cms/article-form";
+import { toMarkdown, slugify } from "../../lib/cms/markdown";
+import { saveFiles, type FileToSave } from "../../lib/cms/store";
+
+export const prerender = false;
+
+let error = "";
+let success = "";
+let publishedSlug = "";
+let values: Record<string, any> = {};
+
+if (Astro.request.method === "POST") {
+  try {
+    const form = await Astro.request.formData();
+    const parsed = await parseArticleForm(form);
+    values = parsed.input;
+    if (parsed.error) {
+      error = parsed.error;
+    } else {
+      let slug = slugify(parsed.input.title);
+      const existingIds = new Set((await getCollection("articles")).map((a) => a.id));
+      let candidate = slug;
+      let n = 2;
+      while (existingIds.has(candidate)) candidate = `${slug}-${n++}`;
+      slug = candidate;
+
+      const files: FileToSave[] = [];
+      if (parsed.imageFile) {
+        const imagePath = `public/images/articles/${slug}.${parsed.imageFile.ext}`;
+        files.push({ repoPath: imagePath, content: parsed.imageFile.buffer });
+        parsed.input.image = `/images/articles/${slug}.${parsed.imageFile.ext}`;
+      }
+      files.push({
+        repoPath: `src/content/articles/${slug}.md`,
+        content: toMarkdown(parsed.input as any),
+      });
+
+      success = await saveFiles(files, `Publish: ${parsed.input.title}`);
+      publishedSlug = slug;
+      values = {};
+    }
+  } catch (e) {
+    error = e instanceof Error ? e.message : String(e);
+  }
+}
+---
+
+<AdminLayout title="New Post">
+  <h1 class="admin-h1">Publish new content</h1>
+  {error && <p class="notice notice--err">{error}</p>}
+  {
+    success && (
+      <p class="notice notice--ok">
+        <strong>Published.</strong> {success}{" "}
+        <a href={`/admin/edit/${publishedSlug}/`}>Keep editing</a> ·{" "}
+        <a href="/admin/">Back to content</a>
+      </p>
+    )
+  }
+  <ArticleForm values={values} submitLabel="Publish" />
+</AdminLayout>
