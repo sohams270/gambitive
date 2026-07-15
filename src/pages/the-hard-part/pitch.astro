@@ -1,0 +1,125 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import BrandMark from "../../components/BrandMark.astro";
+import { SITE } from "../../lib/site";
+---
+
+<BaseLayout
+  title="Pitch The Hard Part"
+  description="Pitch your story for The Hard Part: real numbers, real mistakes, specific decisions."
+>
+  <div class="wrap pitch">
+    <header>
+      <p class="eyebrow"><BrandMark size={10} /> The Hard Part</p>
+      <h1>Pitch your story</h1>
+      <p class="lede">
+        This section runs stories with real numbers, real mistakes, and
+        specific decisions — the version you'd tell a friend, not a journalist.
+        It's an application, not a publishing portal: every story is
+        editor-curated, and none are <a href="/editorial-policy/">ever paid</a>.
+      </p>
+    </header>
+
+    <form action={SITE.pitchFormAction} method="POST">
+      <div class="field">
+        <label for="name">Your name</label>
+        <input id="name" name="name" type="text" required autocomplete="name" />
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input id="email" name="email" type="email" required autocomplete="email" />
+      </div>
+
+      <div class="field">
+        <label for="role">Role and company</label>
+        <input
+          id="role"
+          name="role_company"
+          type="text"
+          required
+          placeholder="e.g. Co-founder, Acme Logistics"
+        />
+      </div>
+
+      <div class="field">
+        <label for="pitch">The story, in a few sentences</label>
+        <p class="hint">
+          What went wrong or got hard, what you decided, and how it ended. No
+          arc required — specifics beat polish.
+        </p>
+        <textarea id="pitch" name="pitch" rows="6" required></textarea>
+      </div>
+
+      <div class="field">
+        <label for="number">One real number you'll share</label>
+        <p class="hint">
+          The filter for this section. Money spent, revenue lost, months
+          wasted, people who left — a specific figure you're willing to put in
+          print.
+        </p>
+        <input
+          id="number"
+          name="real_number"
+          type="text"
+          required
+          placeholder="e.g. ₹4.2 crore spent, 0 purchase orders"
+        />
+      </div>
+
+      <button type="submit" class="btn">Send the pitch</button>
+      <p class="meta">
+        We read everything and reply within two weeks if it's a fit.
+      </p>
+    </form>
+  </div>
+</BaseLayout>
+
+<style>
+  .pitch {
+    max-width: var(--measure);
+    padding-block: var(--space-8) var(--space-7);
+  }
+  h1 {
+    font-size: var(--size-h1);
+    margin-block: var(--space-3) var(--space-4);
+  }
+  .lede {
+    color: var(--text-secondary);
+    font-size: 1.1875rem;
+    margin-bottom: var(--space-7);
+  }
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+    align-items: flex-start;
+  }
+  .field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    width: 100%;
+  }
+  label {
+    font-weight: 600;
+    font-size: var(--size-small);
+  }
+  .hint {
+    font-size: var(--size-meta);
+    color: var(--text-secondary);
+    margin: 0;
+  }
+  input,
+  textarea {
+    padding: 0.625rem 0.875rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--white);
+    font-size: var(--size-small);
+    width: 100%;
+  }
+  textarea {
+    resize: vertical;
+  }
+</style>

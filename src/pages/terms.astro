@@ -1,0 +1,36 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import { SITE } from "../lib/site";
+---
+
+<PageLayout title="Terms of Use" lede="The short, readable version of the usual terms.">
+  <p><em>Last updated: July 2026. This is a starting template — have it reviewed before treating it as legal compliance.</em></p>
+
+  <h2>Content</h2>
+  <p>
+    Everything published on Gambitive is copyright Gambitive Media unless stated
+    otherwise. Quote us with attribution and a link — that's encouraged.
+    Republishing full pieces without permission isn't. For syndication
+    requests, <a href="/contact/">contact us</a>.
+  </p>
+
+  <h2>Accuracy</h2>
+  <p>
+    We work hard to get things right, and we correct errors per our
+    <a href="/editorial-policy/">editorial policy</a>. Nothing here is
+    investment, legal, or professional advice. Decisions you make based on our
+    analysis are yours.
+  </p>
+
+  <h2>Newsletter</h2>
+  <p>
+    Subscribing means we send you the newsletter described at signup. You can
+    leave any time, and how we handle your email is covered in the
+    <a href="/privacy/">privacy policy</a>.
+  </p>
+
+  <h2>Questions</h2>
+  <p>
+    <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>
+  </p>
+</PageLayout>

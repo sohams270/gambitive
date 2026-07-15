@@ -1,0 +1,49 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import { SITE } from "../lib/site";
+---
+
+<PageLayout
+  title="About Gambitive"
+  lede="We explain what tech and startup news actually means, and we let leaders tell the stories they don't tell anywhere else."
+>
+  <p>
+    A gambit is a calculated opening: giving something up now for a better
+    position later. Founders make that trade every week. Gambitive exists to
+    make sense of those moves — the news, the noise, and the announcements
+    coming out of {SITE.niche}.
+  </p>
+  <p>
+    We're not first, and we don't try to be. Plenty of places will tell you a
+    funding round happened twenty minutes after the press release lands. We'd
+    rather tell you what it means, who it affects, and what the people involved
+    learned the hard way.
+  </p>
+  <h2>What we publish</h2>
+  <p>
+    <strong><a href="/latest/">Latest</a></strong> — what happened, and why it
+    matters, fast. Short, and only when there's a "why it matters" worth your
+    time.
+  </p>
+  <p>
+    <strong><a href="/deep-dives/">Deep Dives</a></strong> — the analysis
+    nobody else is doing. Original reporting and reconstruction, not rewritten
+    coverage.
+  </p>
+  <p>
+    <strong><a href="/the-hard-part/">The Hard Part</a></strong> — founders and
+    operators on the decisions that went wrong, with real numbers. Never paid,
+    never PR-approved. <a href="/editorial-policy/">Our editorial policy</a>
+    covers how we keep it that way.
+  </p>
+  <h2>Who it's for</h2>
+  <p>
+    Founders, operators, investors, and serious professionals in the ecosystem.
+    We assume you're smart and short on time, so every piece has to earn its
+    length. No filler, no clickbait, no listicles.
+  </p>
+  <p>
+    The best way to read us is the <a href="/newsletter/">weekly newsletter</a>.
+    Questions, tips, corrections: <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>.
+  </p>
+</PageLayout>

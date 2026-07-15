@@ -1,0 +1,14 @@
+---
+// The signature element: a shareable quote card. In Markdown articles use
+// the same markup directly:
+// <figure class="quote-card"><blockquote>…</blockquote><figcaption>Name, Company — Gambitive</figcaption></figure>
+interface Props {
+  attribution?: string;
+}
+const { attribution } = Astro.props;
+---
+
+<figure class="quote-card">
+  <blockquote><slot /></blockquote>
+  {attribution && <figcaption>{attribution} — Gambitive</figcaption>}
+</figure>

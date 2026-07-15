@@ -1,0 +1,61 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import NewsletterSignup from "../components/NewsletterSignup.astro";
+import { SITE } from "../lib/site";
+---
+
+<BaseLayout
+  title="Newsletter"
+  description={`One sharp email a week on ${SITE.niche}. No fluff, no press releases rewritten.`}
+>
+  <div class="wrap narrow">
+    <NewsletterSignup variant="landing" />
+
+    <section class="what">
+      <h2>What you get</h2>
+      <ul>
+        <li>
+          <strong>The week, explained.</strong> The three or four things that
+          actually mattered, and what they mean — not a link dump.
+        </li>
+        <li>
+          <strong>One deep dive.</strong> The analysis piece of the week,
+          summarised honestly enough that you know whether it's worth your
+          click.
+        </li>
+        <li>
+          <strong>One hard part.</strong> A founder or operator on something
+          that went wrong, with real numbers attached.
+        </li>
+      </ul>
+      <p class="meta">
+        Weekly. Free. Unsubscribe in one click, and we don't sell or share your
+        email — <a href="/privacy/">privacy policy</a>.
+      </p>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .narrow {
+    max-width: var(--measure);
+    padding-block: var(--space-8) var(--space-7);
+  }
+  .what {
+    margin-top: var(--space-7);
+  }
+  .what h2 {
+    font-size: var(--size-h2);
+    margin-bottom: var(--space-4);
+  }
+  .what ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .what .meta {
+    margin-top: var(--space-5);
+  }
+</style>

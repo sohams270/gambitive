@@ -1,0 +1,28 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import { SITE } from "../lib/site";
+---
+
+<PageLayout title="Contact" lede="Tips, corrections, feedback, pitches — here's where each one goes.">
+  <p>
+    <strong>Story tips and corrections:</strong>
+    <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>. If we got
+    something wrong, we want to know — see our
+    <a href="/editorial-policy/">corrections policy</a>.
+  </p>
+  <p>
+    <strong>Pitching a founder story:</strong> use
+    <a href="/the-hard-part/pitch/">The Hard Part pitch form</a>. Email pitches
+    for that section get redirected there anyway.
+  </p>
+  <p>
+    <strong>Sponsorships and partnerships:</strong>
+    <a href={`mailto:${SITE.advertiseEmail}`}>{SITE.advertiseEmail}</a>, or read
+    <a href="/advertise/">how advertising works here</a> first.
+  </p>
+  <p>
+    <strong>Press releases:</strong> you can send them to
+    <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>, but we
+    don't rewrite press releases, so set expectations accordingly.
+  </p>
+</PageLayout>

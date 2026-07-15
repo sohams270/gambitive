@@ -1,0 +1,132 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { SECTIONS } from "../lib/site";
+import BrandMark from "./BrandMark.astro";
+import FormattedDate from "./FormattedDate.astro";
+
+interface Props {
+  article: CollectionEntry<"articles">;
+  size?: "small" | "medium" | "large";
+  showSection?: boolean;
+  /** For cards placed on an accent-colored band */
+  onDark?: boolean;
+}
+
+const { article, size = "medium", showSection = true, onDark = false } = Astro.props;
+const section = SECTIONS[article.data.section];
+const url = `/${section.slug}/${article.id}/`;
+const isHardPart = article.data.section === "the-hard-part";
+---
+
+<article
+  class:list={[
+    "card",
+    `card--${size}`,
+    { "card--hard": isHardPart, "card--ondark": onDark },
+  ]}
+>
+  {
+    article.data.image && (
+      <a href={url} class="card-thumb" tabindex="-1" aria-hidden="true">
+        <img
+          src={article.data.image}
+          alt=""
+          width="1200"
+          height="630"
+          loading="lazy"
+        />
+      </a>
+    )
+  }
+  {
+    showSection && (
+      <p class="eyebrow">
+        {isHardPart && <BrandMark size={10} />}
+        {section.name}
+      </p>
+    )
+  }
+  <h3 class="card-title">
+    <a href={url}>{article.data.title}</a>
+  </h3>
+  <p class="card-dek">{article.data.dek}</p>
+  <p class="meta">
+    {article.data.author} · <FormattedDate date={article.data.pubDate} />
+  </p>
+</article>
+
+<style>
+  .card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+  .card-thumb {
+    display: block;
+    margin-bottom: var(--space-2);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .card-thumb img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1200 / 630;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .card:hover .card-thumb img {
+      transform: scale(1.02);
+    }
+  }
+  .card-title {
+    font-size: var(--size-h3);
+    line-height: 1.25;
+  }
+  .card--large .card-title {
+    font-size: var(--size-h2);
+  }
+  .card--small .card-title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+  }
+  .card-title a {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .card-title a:hover {
+    color: var(--accent);
+  }
+  .card-dek {
+    color: var(--text-secondary);
+    font-size: var(--size-small);
+  }
+  .card--small .card-dek {
+    display: none;
+  }
+  /* The Hard Part: recognizable but restrained — serif dek in a hair
+     more weight, brand mark in the eyebrow (set above). */
+  .card--hard .card-dek {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    color: var(--text-primary);
+  }
+  /* On-accent variant — must come last so it wins over the rules above */
+  .card--ondark .card-title a {
+    color: var(--white);
+  }
+  .card--ondark .card-title a:hover {
+    color: rgba(255, 255, 255, 0.75);
+  }
+  .card--ondark .card-dek {
+    color: rgba(255, 255, 255, 0.88);
+  }
+  .card--ondark .meta,
+  .card--ondark .eyebrow {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  .card--ondark :focus-visible {
+    outline-color: var(--white);
+  }
+</style>

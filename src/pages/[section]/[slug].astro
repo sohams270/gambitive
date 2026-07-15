@@ -1,0 +1,344 @@
+---
+import { getCollection, render } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import NewsletterSignup from "../../components/NewsletterSignup.astro";
+import BrandMark from "../../components/BrandMark.astro";
+import FormattedDate from "../../components/FormattedDate.astro";
+import ArticleCard from "../../components/ArticleCard.astro";
+import { SITE, SECTIONS } from "../../lib/site";
+
+export async function getStaticPaths() {
+  const articles = await getCollection("articles", ({ data }) => !data.draft);
+  return articles.map((article) => ({
+    params: { section: article.data.section, slug: article.id },
+    props: { article },
+  }));
+}
+
+const { article } = Astro.props;
+const { Content } = await render(article);
+const section = SECTIONS[article.data.section];
+const isHardPart = article.data.section === "the-hard-part";
+
+const all = (await getCollection("articles", ({ data }) => !data.draft))
+  .filter((a) => a.id !== article.id)
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// Right rail: newest pieces from the same section.
+const related = all
+  .filter((a) => a.data.section === article.data.section)
+  .slice(0, 3);
+
+// End-of-article slides: newest pieces not already shown in the rail.
+const relatedIds = new Set(related.map((a) => a.id));
+const alsoRead = all.filter((a) => !relatedIds.has(a.id)).slice(0, 5);
+
+// TL;DR: one point per line, leading "- " stripped.
+const tldrPoints = (article.data.tldr ?? "")
+  .split("\n")
+  .map((line) => line.replace(/^-\s*/, "").trim())
+  .filter(Boolean);
+
+// Author bio: frontmatter override, else the house bios.
+const HOUSE_BIOS: Record<string, string> = {
+  "Gambitive Staff": `Reporting and analysis from the ${SITE.name} newsroom. We explain what tech and startup news actually means — judgment over speed, no press releases rewritten.`,
+  "As told to Gambitive": `First-person founder and operator stories, told to and edited by ${SITE.name}. The Hard Part is never a paid placement: real numbers, real mistakes, specific decisions.`,
+};
+const authorBio =
+  article.data.authorBio ??
+  HOUSE_BIOS[article.data.author] ??
+  `Writes for ${SITE.name} on ${SITE.niche}.`;
+const authorInitials = article.data.author
+  .split(/\s+/)
+  .map((w) => w[0])
+  .slice(0, 2)
+  .join("")
+  .toUpperCase();
+const isHouseAuthor = article.data.author in HOUSE_BIOS;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": article.data.section === "latest" ? "NewsArticle" : "Article",
+  headline: article.data.title,
+  description: article.data.dek,
+  author: { "@type": "Person", name: article.data.author },
+  publisher: {
+    "@type": "Organization",
+    name: SITE.name,
+    url: SITE.url,
+    logo: { "@type": "ImageObject", url: `${SITE.url}/favicon.svg` },
+  },
+  datePublished: article.data.pubDate.toISOString(),
+  ...(article.data.updatedDate && {
+    dateModified: article.data.updatedDate.toISOString(),
+  }),
+  mainEntityOfPage: `${SITE.url}/${section.slug}/${article.id}/`,
+  image: `${SITE.url}/og/${article.id}.png`,
+};
+---
+
+<BaseLayout
+  title={article.data.title}
+  description={article.data.dek}
+  ogImage={`/og/${article.id}.png`}
+  jsonLd={jsonLd}
+>
+  <article>
+    <header class="wrap article-header" class:list={{ hard: isHardPart }}>
+      <div class="rule" aria-hidden="true"></div>
+      <a href={`/${section.slug}/`} class="eyebrow">
+        {isHardPart && <BrandMark size={10} />}
+        {section.name}
+      </a>
+      <h1>{article.data.title}</h1>
+      <p class="dek">{article.data.dek}</p>
+      <p class="meta byline">
+        By {article.data.author} · <FormattedDate date={article.data.pubDate} />
+      </p>
+    </header>
+
+    {
+      article.data.image && (
+        <figure class="wrap lead-image">
+          <img
+            src={article.data.image}
+            alt={article.data.imageAlt ?? ""}
+            width="1200"
+            height="630"
+            loading="eager"
+          />
+        </figure>
+      )
+    }
+
+    <div class="wrap article-layout">
+      {
+        tldrPoints.length > 0 && (
+          <aside class="rail rail-tldr" aria-label="Summary">
+            <p class="rail-heading">TL;DR</p>
+            <ul>
+              {tldrPoints.map((point) => (
+                <li>{point}</li>
+              ))}
+            </ul>
+          </aside>
+        )
+      }
+
+      <div class="article-main">
+        <div class="prose">
+          <Content />
+        </div>
+
+        <aside class="author-bio" aria-label="About the author">
+          <div class="avatar" aria-hidden="true">
+            {isHouseAuthor ? <BrandMark size={18} /> : authorInitials}
+          </div>
+          <div>
+            <p class="author-name">{article.data.author}</p>
+            <p class="author-text">{authorBio}</p>
+          </div>
+        </aside>
+      </div>
+
+      {
+        related.length > 0 && (
+          <aside class="rail rail-related" aria-label="Related posts">
+            <p class="rail-heading">Related Posts</p>
+            <div class="related-list">
+              {related.map((a) => (
+                <ArticleCard article={a} size="small" showSection={false} />
+              ))}
+            </div>
+          </aside>
+        )
+      }
+    </div>
+
+    {
+      alsoRead.length > 0 && (
+        <section class="wrap also-read" aria-labelledby="also-read-h">
+          <h2 id="also-read-h" class="also-read-heading">Also Read</h2>
+          <div class="slides">
+            {alsoRead.map((a) => (
+              <ArticleCard article={a} size="small" />
+            ))}
+          </div>
+        </section>
+      )
+    }
+
+    <div class="wrap prose-width">
+      <NewsletterSignup variant="end" />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .article-header {
+    max-width: var(--measure);
+    padding-block: var(--space-7) var(--space-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .rule {
+    width: 3.5rem;
+    height: 6px;
+    background: var(--accent);
+  }
+  h1 {
+    font-size: var(--size-h1);
+  }
+  /* The Hard Part signature: same system, heavier headline optical size */
+  .article-header.hard h1 {
+    font-variation-settings: "opsz" 144;
+    font-weight: 700;
+  }
+  .dek {
+    font-size: var(--size-lede);
+    line-height: 1.45;
+    color: var(--text-secondary);
+    text-wrap: balance;
+  }
+  .lead-image {
+    max-width: var(--measure);
+    margin-bottom: var(--space-6);
+  }
+  .lead-image img {
+    border-radius: var(--radius);
+  }
+
+  /* Three-column layout: TL;DR rail, article, related rail ---------- */
+  .article-layout {
+    display: grid;
+    grid-template-columns: minmax(0, var(--measure));
+    justify-content: center;
+    gap: var(--space-7);
+  }
+  @media (min-width: 78rem) {
+    .article-layout {
+      grid-template-columns: 15rem minmax(0, var(--measure)) 15rem;
+    }
+    .rail {
+      position: sticky;
+      top: var(--space-6);
+      align-self: start;
+    }
+    /* Rails order themselves via grid auto-placement: tldr, main, related */
+  }
+
+  .rail-heading {
+    font-size: var(--size-meta);
+    font-weight: 600;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    color: var(--accent);
+    border-top: 4px solid var(--accent);
+    padding-top: var(--space-3);
+    margin-bottom: var(--space-4);
+  }
+
+  .rail-tldr ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+  .rail-tldr li {
+    font-size: var(--size-small);
+    line-height: 1.5;
+    padding-left: var(--space-4);
+    position: relative;
+  }
+  .rail-tldr li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+    width: 8px;
+    height: 6px;
+    background: var(--accent);
+    clip-path: polygon(15% 0, 85% 0, 68% 100%, 32% 100%);
+  }
+  /* Below the desktop breakpoint the TL;DR renders as a callout card */
+  @media (max-width: 77.99rem) {
+    .rail-tldr {
+      background: var(--bg-muted);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: var(--space-5);
+    }
+    .rail-tldr .rail-heading {
+      border-top: none;
+      padding-top: 0;
+    }
+  }
+
+  .related-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+  }
+
+  /* Author bio ------------------------------------------------------ */
+  .author-bio {
+    margin-top: var(--space-7);
+    padding-top: var(--space-6);
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-start;
+  }
+  .avatar {
+    flex-shrink: 0;
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 50%;
+    background: var(--accent);
+    color: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-serif);
+    font-weight: 640;
+    font-size: 1.125rem;
+  }
+  .author-name {
+    font-family: var(--font-serif);
+    font-weight: 640;
+    font-size: 1.125rem;
+    margin-bottom: var(--space-1);
+  }
+  .author-text {
+    font-size: var(--size-small);
+    color: var(--text-secondary);
+  }
+
+  /* Also Read slides ------------------------------------------------- */
+  .also-read {
+    margin-top: var(--space-8);
+  }
+  .also-read-heading {
+    font-size: var(--size-h2);
+    margin-bottom: var(--space-5);
+  }
+  .slides {
+    display: flex;
+    gap: var(--space-6);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: var(--space-3);
+    scrollbar-width: thin;
+    scrollbar-color: var(--accent) transparent;
+  }
+  .slides > :global(.card) {
+    flex: 0 0 17rem;
+    scroll-snap-align: start;
+  }
+
+  .prose-width {
+    max-width: calc(var(--measure) + 2 * var(--space-5));
+  }
+</style>

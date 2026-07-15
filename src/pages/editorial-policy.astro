@@ -1,0 +1,61 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import { SITE } from "../lib/site";
+---
+
+<PageLayout
+  title="Editorial Policy & Ethics"
+  lede="The rules we operate by, written down so you can hold us to them."
+>
+  <h2>Independence</h2>
+  <p>
+    Editorial decisions — what we cover, how we cover it, what conclusions we
+    draw — are made by the editorial team alone. Advertisers, sponsors, and
+    sources don't see stories before publication and don't get approval over
+    anything, including stories about themselves.
+  </p>
+
+  <h2>Sponsored content</h2>
+  <p>
+    Anything paid for is labelled "Sponsored" clearly, at the top, in a visual
+    treatment distinct from editorial. We don't publish advertorials disguised
+    as analysis, and we don't accept payment for coverage, placement, or
+    favourable framing. If a sponsor's company appears in our editorial
+    coverage, the sponsorship is disclosed in that piece.
+  </p>
+
+  <h2>The Hard Part is never paid</h2>
+  <p>
+    Stories in <a href="/the-hard-part/">The Hard Part</a> are never paid
+    placements, never PR-arranged image pieces, and never published in exchange
+    for anything. Every story goes through the same editorial filter: real
+    numbers, real mistakes, specific decisions. Subjects see their quotes for
+    accuracy checking — not for approval, softening, or removal of
+    inconvenient details. If a story reads flattering, that's an editing
+    failure, and we'd like to <a href="/contact/">hear about it</a>.
+  </p>
+
+  <h2>Corrections</h2>
+  <p>
+    When we get facts wrong, we correct the piece and append a note saying what
+    changed and when. Significant errors get flagged in the next newsletter as
+    well. We don't silently edit published stories, and we don't delete pieces
+    because someone finds them inconvenient. Spotted an error? Write to
+    <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a>.
+  </p>
+
+  <h2>Sources</h2>
+  <p>
+    We grant anonymity when naming a source would expose them to real
+    professional risk, and we tell you when we've done so and why the source is
+    in a position to know. Numbers from anonymous sources get corroborated
+    before we print them or they get framed as unverified.
+  </p>
+
+  <h2>Conflicts of interest</h2>
+  <p>
+    Writers disclose financial interests — investments, advisory roles,
+    employment history — in any company they cover, in the piece itself. Where
+    a conflict is material, someone else writes the story.
+  </p>
+</PageLayout>

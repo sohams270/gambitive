@@ -1,0 +1,107 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ArticleCard from "./ArticleCard.astro";
+import BrandMark from "./BrandMark.astro";
+import { SECTIONS, type SectionSlug } from "../lib/site";
+
+interface Props {
+  section: SectionSlug;
+}
+
+const { section } = Astro.props;
+const meta = SECTIONS[section];
+const isHardPart = section === "the-hard-part";
+
+const articles = (
+  await getCollection(
+    "articles",
+    ({ data }) => data.section === section && !data.draft,
+  )
+).sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+---
+
+<BaseLayout title={meta.name} description={meta.tagline}>
+  <div class="wrap">
+    <header class="archive-header reveal">
+      <div class="rule" aria-hidden="true"></div>
+      <h1>
+        {isHardPart && <BrandMark size={22} class="mark" />}
+        {meta.name}
+      </h1>
+      <p class="tagline">{meta.tagline}</p>
+      {
+        isHardPart && (
+          <p class="hard-note">
+            Real numbers, real mistakes, specific decisions. Never paid
+            placements — <a href="/editorial-policy/">that's policy</a>. Built
+            something and learned the hard way? <a href="/the-hard-part/pitch/">Pitch your story</a>.
+          </p>
+        )
+      }
+    </header>
+
+    {
+      articles.length === 0 ? (
+        <p class="empty">
+          Nothing published here yet. The <a href="/newsletter/">newsletter</a>
+          is where new pieces land first.
+        </p>
+      ) : (
+        <div class="archive-list">
+          {articles.map((article) => (
+            <ArticleCard article={article} showSection={false} />
+          ))}
+        </div>
+      )
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .archive-header {
+    padding-block: var(--space-8) var(--space-7);
+    max-width: 46rem;
+  }
+  .rule {
+    width: 3.5rem;
+    height: 6px;
+    background: var(--accent);
+    margin-bottom: var(--space-5);
+  }
+  h1 {
+    font-size: var(--size-display);
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+  }
+  h1 :global(.mark) {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .tagline {
+    margin-top: var(--space-3);
+    font-size: var(--size-lede);
+    color: var(--text-secondary);
+  }
+  .hard-note {
+    margin-top: var(--space-4);
+    font-size: var(--size-small);
+    color: var(--text-secondary);
+  }
+  .archive-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    max-width: 46rem;
+    padding-bottom: var(--space-7);
+  }
+  .archive-list > :global(article:not(:first-child)) {
+    border-top: 1px solid var(--border);
+    padding-top: var(--space-6);
+  }
+  .empty {
+    color: var(--text-secondary);
+    padding-bottom: var(--space-8);
+  }
+</style>

@@ -1,0 +1,42 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import { SITE } from "../lib/site";
+---
+
+<PageLayout
+  title="Privacy Policy"
+  lede="Short version: we collect almost nothing, and we don't sell any of it."
+>
+  <p><em>Last updated: July 2026. This is a starting template — have it reviewed before treating it as legal compliance.</em></p>
+
+  <h2>What we collect</h2>
+  <p>
+    <strong>Newsletter:</strong> your email address, when you give it to us.
+    It's stored with our newsletter provider and used to send you the
+    newsletter. Nothing else.
+  </p>
+  <p>
+    <strong>Analytics:</strong> we use privacy-respecting, cookieless analytics
+    that collect aggregate usage data (pages visited, referrers, country-level
+    location). No personal profiles, no cross-site tracking, no advertising
+    identifiers.
+  </p>
+  <p>
+    <strong>Story pitches:</strong> what you submit through the pitch form is
+    used to evaluate and follow up on your pitch, and for nothing else.
+  </p>
+
+  <h2>What we don't do</h2>
+  <p>
+    We don't sell or rent your data, we don't run third-party advertising
+    trackers, and we don't share your email with sponsors.
+  </p>
+
+  <h2>Your choices</h2>
+  <p>
+    Every newsletter has a one-click unsubscribe. To have your data deleted —
+    email address, pitch submissions, anything — write to
+    <a href={`mailto:${SITE.contactEmail}`}>{SITE.contactEmail}</a> and we'll
+    confirm when it's done.
+  </p>
+</PageLayout>

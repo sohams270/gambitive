@@ -1,0 +1,33 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import { SITE } from "../lib/site";
+---
+
+<PageLayout
+  title="Advertise"
+  lede="A small, senior audience that reads to the end. If that's who you're trying to reach, let's talk."
+>
+  <h2>Who reads Gambitive</h2>
+  <p>
+    Founders, operators, CXOs, and investors in the startup ecosystem. We
+    optimise for engaged reading — time on page and newsletter reply rates —
+    over raw pageviews, and we'll share real numbers when we talk.
+  </p>
+  <ul>
+    <li>Newsletter subscribers: <em>updated as real numbers come in</em></li>
+    <li>Newsletter open rate: <em>updated as real numbers come in</em></li>
+    <li>Monthly readers: <em>updated as real numbers come in</em></li>
+  </ul>
+  <h2>What we offer</h2>
+  <p>
+    Newsletter sponsorships and site sponsorships. All sponsored content is
+    clearly labelled — no exceptions, no "brand partnerships" dressed up as
+    editorial. Stories in The Hard Part are never paid placements, and
+    sponsorship buys no influence over coverage. The full rules are in our
+    <a href="/editorial-policy/">editorial policy</a>.
+  </p>
+  <p>
+    For availability and rates:
+    <a href={`mailto:${SITE.advertiseEmail}`}>{SITE.advertiseEmail}</a>.
+  </p>
+</PageLayout>

@@ -1,0 +1,93 @@
+---
+import BrandMark from "./BrandMark.astro";
+
+const links = [
+  { href: "/about/", label: "About" },
+  { href: "/contact/", label: "Contact" },
+  { href: "/advertise/", label: "Advertise" },
+  { href: "/editorial-policy/", label: "Editorial Policy & Ethics" },
+  { href: "/privacy/", label: "Privacy Policy" },
+  { href: "/terms/", label: "Terms" },
+  { href: "/rss.xml", label: "RSS" },
+];
+---
+
+<footer class="site-footer">
+  <div class="wrap inner">
+    <p class="brand">
+      <BrandMark size={13} class="mark" />
+      Gambitive
+    </p>
+    <p class="line">The moves behind the moves.</p>
+    <nav aria-label="Footer">
+      <ul>
+        {
+          links.map((l) => (
+            <li>
+              <a href={l.href}>{l.label}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <p class="copyright">© {new Date().getFullYear()} Gambitive Media</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--accent);
+    color: var(--white);
+    margin-top: var(--space-9);
+    padding-block: var(--space-7);
+  }
+  .inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+  }
+  .brand {
+    font-family: var(--font-serif);
+    font-weight: 640;
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .brand :global(.mark) {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .line {
+    font-family: var(--font-serif);
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.65);
+    font-size: var(--size-small);
+    margin-top: calc(-1 * var(--space-3));
+  }
+  ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3) var(--space-5);
+    list-style: none;
+    padding: 0;
+  }
+  a {
+    color: rgba(255, 255, 255, 0.85);
+    text-decoration: none;
+    font-size: var(--size-small);
+  }
+  a:hover {
+    color: var(--white);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .copyright {
+    font-size: var(--size-meta);
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  /* Footer sits on accent — override global focus ring for visibility */
+  a:focus-visible {
+    outline-color: var(--white);
+  }
+</style>

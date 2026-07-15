@@ -1,0 +1,10 @@
+---
+import { signupHtml, type SignupVariant } from "../lib/signup-html";
+
+interface Props {
+  variant?: SignupVariant;
+}
+const { variant = "home" } = Astro.props;
+---
+
+<Fragment set:html={signupHtml(variant)} />

@@ -1,0 +1,212 @@
+---
+import { SECTIONS } from "../lib/site";
+import BrandMark from "./BrandMark.astro";
+
+const path = Astro.url.pathname;
+const navItems = [
+  { href: "/latest/", label: SECTIONS.latest.name },
+  { href: "/deep-dives/", label: SECTIONS["deep-dives"].name },
+  { href: "/the-hard-part/", label: SECTIONS["the-hard-part"].name, hard: true },
+  { href: "/newsletter/", label: "Newsletter" },
+];
+---
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a href="/" class="wordmark">
+      <BrandMark size={15} class="wm-mark" />
+      Gambitive
+    </a>
+
+    <nav aria-label="Main">
+      <ul id="site-nav" class="nav-list">
+        {
+          navItems.map((item) => (
+            <li>
+              <a
+                href={item.href}
+                class:list={{ "nav-hard": item.hard }}
+                aria-current={path.startsWith(item.href) ? "page" : undefined}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <a href="/newsletter/" class="btn">Subscribe</a>
+      <button
+        class="menu-toggle"
+        aria-expanded="false"
+        aria-controls="site-nav"
+        aria-label="Menu"
+      >
+        <span class="menu-icon" aria-hidden="true"></span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-top: 4px solid var(--accent);
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+    padding-block: var(--space-4);
+  }
+  .wordmark {
+    font-family: var(--font-serif);
+    font-weight: 680;
+    font-size: 1.625rem;
+    color: var(--text-primary);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+  .wordmark :global(.wm-mark) {
+    color: var(--accent);
+  }
+  .nav-list {
+    display: flex;
+    gap: var(--space-6);
+    list-style: none;
+    padding: 0;
+  }
+  .nav-list a {
+    color: var(--text-primary);
+    text-decoration: none;
+    font-size: var(--size-small);
+    font-weight: 500;
+  }
+  .nav-list a:hover,
+  .nav-list a[aria-current="page"] {
+    color: var(--accent);
+  }
+  .nav-list a[aria-current="page"] {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+  }
+
+  /* The Hard Part is the flagship section — serif wordmark treatment
+     with a slow moving gradient in the brand green family. */
+  .nav-list a.nav-hard {
+    font-family: var(--font-serif);
+    font-weight: 680;
+    font-size: 1.0625rem;
+    letter-spacing: 0.005em;
+    background: linear-gradient(
+      100deg,
+      var(--accent) 0%,
+      #23a06f 25%,
+      #7fc7a4 50%,
+      #23a06f 75%,
+      var(--accent) 100%
+    );
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .nav-list a.nav-hard[aria-current="page"],
+  .nav-list a.nav-hard:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 6px;
+    text-decoration-color: var(--accent);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .nav-list a.nav-hard {
+      animation: hard-shimmer 4s linear infinite;
+    }
+    @keyframes hard-shimmer {
+      from {
+        background-position: 200% 0;
+      }
+      to {
+        background-position: 0% 0;
+      }
+    }
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+  .menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    padding: var(--space-2);
+    cursor: pointer;
+  }
+  .menu-icon,
+  .menu-icon::before,
+  .menu-icon::after {
+    display: block;
+    width: 20px;
+    height: 2px;
+    background: var(--text-primary);
+    content: "";
+  }
+  .menu-icon::before {
+    transform: translateY(-6px);
+  }
+  .menu-icon::after {
+    transform: translateY(4px);
+  }
+
+  @media (max-width: 44rem) {
+    .menu-toggle {
+      display: block;
+    }
+    .nav-list {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      gap: 0;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: var(--space-3) var(--space-5) var(--space-5);
+      z-index: 10;
+    }
+    .nav-list.open {
+      display: flex;
+    }
+    .nav-list a {
+      display: block;
+      padding-block: var(--space-3);
+      font-size: var(--size-body);
+    }
+    /* Keep the flagship item a step above its siblings on mobile too */
+    .nav-list a.nav-hard {
+      font-size: 1.25rem;
+    }
+    .site-header {
+      position: relative;
+    }
+  }
+</style>
+
+<script>
+  const toggle = document.querySelector<HTMLButtonElement>(".menu-toggle");
+  const nav = document.getElementById("site-nav");
+  toggle?.addEventListener("click", () => {
+    const open = nav?.classList.toggle("open");
+    toggle.setAttribute("aria-expanded", String(Boolean(open)));
+  });
+</script>

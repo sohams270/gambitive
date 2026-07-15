@@ -1,0 +1,287 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import ArticleCard from "../components/ArticleCard.astro";
+import NewsletterSignup from "../components/NewsletterSignup.astro";
+import BrandMark from "../components/BrandMark.astro";
+import FormattedDate from "../components/FormattedDate.astro";
+import { SITE, SECTIONS } from "../lib/site";
+
+const all = (await getCollection("articles", ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+
+// Lead story: most recent featured piece, else the newest article.
+const hero = all.find((a) => a.data.featured) ?? all[0];
+const rest = all.filter((a) => a !== hero);
+
+const latest = rest.filter((a) => a.data.section === "latest").slice(0, 6);
+const deepDives = rest.filter((a) => a.data.section === "deep-dives").slice(0, 3);
+const hardPart = rest.filter((a) => a.data.section === "the-hard-part").slice(0, 2);
+
+const heroSection = hero ? SECTIONS[hero.data.section] : null;
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: SITE.name,
+  url: SITE.url,
+  description: SITE.description,
+  publisher: { "@type": "Organization", name: SITE.name, url: SITE.url },
+};
+---
+
+<BaseLayout jsonLd={jsonLd}>
+  {
+    hero && heroSection && (
+      <section class="hero reveal" aria-label="Lead story">
+        <div class="wrap hero-grid">
+          <div class="hero-text">
+            <div class="hero-rule" aria-hidden="true" />
+            <a href={`/${heroSection.slug}/`} class="eyebrow">
+              {hero.data.section === "the-hard-part" && <BrandMark size={10} />}
+              {heroSection.name}
+            </a>
+            <h1>
+              <a href={`/${heroSection.slug}/${hero.id}/`}>{hero.data.title}</a>
+            </h1>
+            <p class="hero-dek">{hero.data.dek}</p>
+            <p class="meta">
+              {hero.data.author} · <FormattedDate date={hero.data.pubDate} />
+            </p>
+          </div>
+          {hero.data.image && (
+            <a
+              href={`/${heroSection.slug}/${hero.id}/`}
+              class="hero-image"
+              tabindex="-1"
+              aria-hidden="true"
+            >
+              <img
+                src={hero.data.image}
+                alt=""
+                width="1200"
+                height="630"
+                loading="eager"
+              />
+            </a>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    latest.length > 0 && (
+      <section class="strip" aria-labelledby="latest-h">
+        <div class="wrap">
+          <div class="strip-head">
+            <h2 id="latest-h">
+              <a href="/latest/">Latest</a>
+            </h2>
+            <p class="meta">{SECTIONS.latest.tagline}</p>
+          </div>
+          <div class="latest-grid">
+            {latest.map((a) => (
+              <ArticleCard article={a} size="small" showSection={false} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    deepDives.length > 0 && (
+      <section class="strip band--muted" aria-labelledby="deep-h">
+        <div class="wrap">
+          <div class="strip-head">
+            <h2 id="deep-h">
+              <a href="/deep-dives/">Deep Dives</a>
+            </h2>
+            <p class="meta">{SECTIONS["deep-dives"].tagline}</p>
+          </div>
+          <div class="deep-grid">
+            {deepDives.map((a) => (
+              <ArticleCard article={a} size="large" showSection={false} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    hardPart.length > 0 && (
+      <section class="strip band--dark" aria-labelledby="hard-h">
+        <div class="wrap">
+          <div class="strip-head">
+            <h2 id="hard-h" class="hard-title">
+              <BrandMark size={16} class="mark" />
+              <a href="/the-hard-part/">The Hard Part</a>
+            </h2>
+            <p class="meta dark-meta">{SECTIONS["the-hard-part"].tagline}</p>
+          </div>
+          <div class="hard-grid">
+            {hardPart.map((a) => (
+              <ArticleCard article={a} size="large" showSection={false} onDark />
+            ))}
+          </div>
+          <p class="hard-cta">
+            <a href="/the-hard-part/pitch/">Built something and learned the hard way? Pitch your story →</a>
+          </p>
+        </div>
+      </section>
+    )
+  }
+
+  <div class="wrap">
+    <NewsletterSignup variant="home" />
+  </div>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-block: var(--space-8);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: var(--space-7);
+    align-items: center;
+  }
+  .hero-image {
+    display: block;
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .hero-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1200 / 630;
+    object-fit: cover;
+  }
+  @media (max-width: 56rem) {
+    .hero-grid {
+      grid-template-columns: 1fr;
+      gap: var(--space-5);
+    }
+    .hero-image {
+      order: -1;
+    }
+  }
+  .hero-rule {
+    width: 3.5rem;
+    height: 6px;
+    background: var(--accent);
+    margin-bottom: var(--space-5);
+  }
+  .hero h1 {
+    /* Slightly below display size: the hero shares the row with its image */
+    font-size: clamp(1.875rem, 3.4vw, 3.125rem);
+    margin-block: var(--space-3) var(--space-4);
+    max-width: 56rem;
+  }
+  .hero h1 a {
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+  .hero h1 a:hover {
+    color: var(--accent);
+  }
+  .hero-dek {
+    font-size: var(--size-lede);
+    color: var(--text-secondary);
+    max-width: 42rem;
+    margin-bottom: var(--space-3);
+  }
+
+  .strip {
+    padding-block: var(--space-7);
+  }
+  .strip-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-6);
+  }
+  .strip-head h2 {
+    font-size: var(--size-h2);
+  }
+  .strip-head h2 a {
+    color: inherit;
+    text-decoration: none;
+  }
+  .strip-head h2 a:hover {
+    color: var(--accent);
+  }
+
+  /* Latest sits between the hero and the muted band */
+  .strip:not(.band--muted):not(.band--dark) {
+    border-top: 1px solid var(--border);
+  }
+
+  /* Deep Dives: full-bleed muted band — more visual weight */
+  .band--muted {
+    background: var(--bg-muted);
+    border-block: 1px solid var(--border);
+    padding-block: var(--space-8);
+  }
+
+  /* The Hard Part: the brand color at full strength */
+  .band--dark {
+    background: var(--accent);
+    color: var(--white);
+    padding-block: var(--space-8);
+  }
+  .band--dark .strip-head h2 a:hover {
+    color: rgba(255, 255, 255, 0.8);
+  }
+  .hard-title {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+  }
+  .hard-title :global(.mark) {
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .dark-meta {
+    color: rgba(255, 255, 255, 0.65);
+  }
+  .band--dark :global(a:focus-visible) {
+    outline-color: var(--white);
+  }
+  .hard-cta {
+    margin-top: var(--space-6);
+    font-size: var(--size-small);
+  }
+  .hard-cta a {
+    color: var(--white);
+    font-weight: 600;
+    text-decoration: none;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.4);
+    padding-bottom: 2px;
+  }
+  .hard-cta a:hover {
+    border-bottom-color: var(--white);
+  }
+
+  .latest-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    gap: var(--space-5) var(--space-6);
+  }
+  .deep-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: var(--space-7);
+  }
+  .hard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+    gap: var(--space-7);
+    max-width: 56rem;
+  }
+</style>

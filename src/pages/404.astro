@@ -1,0 +1,43 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import BrandMark from "../components/BrandMark.astro";
+---
+
+<BaseLayout title="Page not found">
+  <div class="wrap notfound">
+    <BrandMark size={28} class="mark" />
+    <h1>This page got sacrificed.</h1>
+    <p>
+      It may have moved, or it never existed. Try one of these instead:
+    </p>
+    <ul>
+      <li><a href="/latest/">Latest</a> — what happened, and why it matters</li>
+      <li><a href="/deep-dives/">Deep Dives</a> — the analysis nobody else is doing</li>
+      <li><a href="/the-hard-part/">The Hard Part</a> — the stories leaders don't put in pitch decks</li>
+      <li><a href="/newsletter/">The newsletter</a> — one sharp email a week</li>
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .notfound {
+    max-width: var(--measure);
+    padding-block: var(--space-9) var(--space-8);
+  }
+  .notfound :global(.mark) {
+    color: var(--accent);
+    margin-bottom: var(--space-4);
+  }
+  h1 {
+    font-size: var(--size-h1);
+    margin-bottom: var(--space-4);
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin-top: var(--space-4);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+</style>
