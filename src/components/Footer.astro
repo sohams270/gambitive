@@ -1,36 +1,154 @@
 ---
 import BrandMark from "./BrandMark.astro";
+import { SITE } from "../lib/site";
 
-const links = [
-  { href: "/about/", label: "About" },
-  { href: "/contact/", label: "Contact" },
-  { href: "/advertise/", label: "Advertise" },
-  { href: "/editorial-policy/", label: "Editorial Policy & Ethics" },
-  { href: "/privacy/", label: "Privacy Policy" },
-  { href: "/terms/", label: "Terms" },
-  { href: "/rss.xml", label: "RSS" },
+const columns = [
+  {
+    heading: "Read",
+    links: [
+      { href: "/latest/", label: "Latest" },
+      { href: "/deep-dives/", label: "Deep Dives" },
+      { href: "/the-hard-part/", label: "The Hard Part" },
+      { href: "/newsletter/", label: "Newsletter" },
+      { href: "/rss.xml", label: "RSS Feed" },
+    ],
+  },
+  {
+    heading: "Company",
+    links: [
+      { href: "/about/", label: "About Gambitive" },
+      { href: "/contact/", label: "Contact Us" },
+      { href: "/advertise/", label: "Advertise" },
+      { href: "/editorial-policy/", label: "Editorial Policy & Ethics" },
+    ],
+  },
+  {
+    heading: "Get Involved",
+    links: [
+      { href: "/the-hard-part/pitch/", label: "Pitch Your Story" },
+      { href: "/newsletter/", label: "Subscribe Free" },
+      { href: "/advertise/", label: "Sponsor Gambitive" },
+      { href: `mailto:${SITE.contactEmail}`, label: "Send a Story Tip" },
+    ],
+  },
 ];
+
+const socials = [
+  {
+    name: "X",
+    href: SITE.social.x,
+    path: "M18.9 1.2h3.7l-8.2 9.3L24 22.8h-7.6l-5.9-7.7-6.8 7.7H0l8.7-10L-.5 1.2H7.3l5.4 7 6.2-7Zm-1.3 19.5h2L6.2 3.2H4l13.6 17.5Z",
+  },
+  {
+    name: "LinkedIn",
+    href: SITE.social.linkedin,
+    path: "M20.4 20.4h-3.5v-5.6c0-1.3 0-3-1.9-3-1.9 0-2.1 1.4-2.1 2.9v5.7H9.4V9h3.4v1.6h.1c.5-.9 1.6-1.9 3.4-1.9 3.6 0 4.2 2.4 4.2 5.4v6.3ZM5.3 7.4a2 2 0 1 1 0-4.1 2 2 0 0 1 0 4.1Zm1.8 13H3.6V9h3.5v11.4ZM22.2 0H1.7C.8 0 0 .8 0 1.7v20.5c0 1 .8 1.8 1.7 1.8h20.5c1 0 1.8-.8 1.8-1.8V1.7c0-.9-.8-1.7-1.8-1.7Z",
+  },
+  {
+    name: "Facebook",
+    href: SITE.social.facebook,
+    path: "M24 12a12 12 0 1 0-13.9 11.9v-8.4h-3v-3.5h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12Z",
+  },
+  {
+    name: "WhatsApp",
+    href: SITE.social.whatsapp,
+    path: "M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1a7.6 7.6 0 0 1-3.8-3.3c-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5 1.9.8 2.6.9 3.6.7.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4 0-.2-.3-.3-.6-.4ZM12 21.8a9.7 9.7 0 0 1-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4a9.8 9.8 0 1 1 8.3 4.6ZM12 .2A11.8 11.8 0 0 0 1.8 17.9L.1 24l6.3-1.6A11.8 11.8 0 1 0 12 .2Z",
+  },
+  {
+    name: "RSS",
+    href: "/rss.xml",
+    path: "M3.4 20.6a2.4 2.4 0 1 1 0-4.8 2.4 2.4 0 0 1 0 4.8ZM1 9.9v3.4A9.7 9.7 0 0 1 10.7 23h3.4A13.1 13.1 0 0 0 1 9.9ZM1 3.1v3.4A16.5 16.5 0 0 1 17.5 23H21A19.9 19.9 0 0 0 1 3.1Z",
+  },
+  {
+    name: "Email",
+    href: `mailto:${SITE.contactEmail}`,
+    path: "M12 12.7 1.6 5.2A2 2 0 0 1 3 4h18a2 2 0 0 1 1.4 1.2L12 12.7ZM12 15 1 7v11a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V7l-11 8Z",
+  },
+].filter((s) => s.href);
 ---
 
 <footer class="site-footer">
-  <div class="wrap inner">
-    <p class="brand">
-      <BrandMark size={13} class="mark" />
-      Gambitive
-    </p>
-    <p class="line">The moves behind the moves.</p>
-    <nav aria-label="Footer">
-      <ul>
+  <div class="wrap upper">
+    <div class="brand-col">
+      <p class="brand">
+        <BrandMark size={14} class="mark" />
+        Gambitive
+      </p>
+      <p class="line">The moves behind the moves.</p>
+      <p class="blurb">
+        The news, the analysis, and the stories founders don't usually tell —
+        told straight, without spin.
+      </p>
+    </div>
+
+    {
+      columns.map((col) => (
+        <nav class="col" aria-label={col.heading}>
+          <p class="col-heading">{col.heading}</p>
+          <ul>
+            {col.links.map((l) => (
+              <li>
+                <a href={l.href}>{l.label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ))
+    }
+  </div>
+
+  <div class="wrap newsletter-band">
+    <div class="nl-copy">
+      <p class="nl-heading">One sharp email a week</p>
+      <p class="nl-body">
+        What happened in {SITE.niche}, why it matters, and the stories founders
+        don't usually tell. No fluff, no press releases rewritten.
+      </p>
+    </div>
+    <form class="nl-form" action={SITE.newsletterAction} method="post">
+      <label class="sr-only" for="footer-email">Email address</label>
+      <input
+        id="footer-email"
+        type="email"
+        name="email"
+        required
+        placeholder="you@company.com"
+        autocomplete="email"
+      />
+      <button type="submit">Subscribe</button>
+    </form>
+  </div>
+
+  <div class="bottom-bar">
+    <div class="wrap bottom-inner">
+      <ul class="legal">
+        <li><a href="/terms/">Terms of Use</a></li>
+        <li><a href="/privacy/">Privacy Policy</a></li>
+        <li><a href="/editorial-policy/">Editorial Policy</a></li>
+        <li><a href="/admin/">Newsroom</a></li>
+      </ul>
+      <ul class="socials" aria-label="Gambitive on social media">
         {
-          links.map((l) => (
+          socials.map((s) => (
             <li>
-              <a href={l.href}>{l.label}</a>
+              <a
+                href={s.href}
+                aria-label={s.name}
+                title={s.name}
+                {...(s.href.startsWith("http")
+                  ? { target: "_blank", rel: "noopener noreferrer" }
+                  : {})}
+              >
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
+                  <path d={s.path} />
+                </svg>
+              </a>
             </li>
           ))
         }
       </ul>
-    </nav>
-    <p class="copyright">© {new Date().getFullYear()} Gambitive Media</p>
+    </div>
+    <p class="copyright">© {new Date().getFullYear()} Gambitive Media, All Rights Reserved</p>
   </div>
 </footer>
 
@@ -39,17 +157,30 @@ const links = [
     background: var(--accent);
     color: var(--white);
     margin-top: var(--space-9);
-    padding-block: var(--space-7);
   }
-  .inner {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
+
+  /* Link columns ---------------------------------------------------- */
+  .upper {
+    display: grid;
+    grid-template-columns: 1.4fr repeat(3, 1fr);
+    gap: var(--space-7) var(--space-6);
+    padding-block: var(--space-8) var(--space-7);
+  }
+  @media (max-width: 64rem) {
+    .upper {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (max-width: 34rem) {
+    .upper {
+      grid-template-columns: 1fr;
+      gap: var(--space-6);
+    }
   }
   .brand {
     font-family: var(--font-serif);
     font-weight: 640;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -62,32 +193,155 @@ const links = [
     font-style: italic;
     color: rgba(255, 255, 255, 0.65);
     font-size: var(--size-small);
-    margin-top: calc(-1 * var(--space-3));
+    margin-top: var(--space-1);
   }
-  ul {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3) var(--space-5);
+  .blurb {
+    margin-top: var(--space-4);
+    font-size: var(--size-small);
+    color: rgba(255, 255, 255, 0.75);
+    max-width: 20rem;
+  }
+  .col-heading {
+    font-size: var(--size-meta);
+    font-weight: 700;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    color: #8fd4b4;
+    margin-bottom: var(--space-4);
+  }
+  .col ul {
     list-style: none;
     padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
   }
-  a {
+  .col a {
     color: rgba(255, 255, 255, 0.85);
     text-decoration: none;
     font-size: var(--size-small);
   }
-  a:hover {
+  .col a:hover {
     color: var(--white);
     text-decoration: underline;
     text-underline-offset: 3px;
   }
-  .copyright {
-    font-size: var(--size-meta);
-    color: rgba(255, 255, 255, 0.55);
+
+  /* Newsletter band -------------------------------------------------- */
+  .newsletter-band {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    flex-wrap: wrap;
+    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    padding-block: var(--space-6);
+  }
+  .nl-heading {
+    font-family: var(--font-serif);
+    font-weight: 640;
+    font-size: var(--size-h3);
+    color: #8fd4b4;
+  }
+  .nl-body {
+    margin-top: var(--space-2);
+    font-size: var(--size-small);
+    color: rgba(255, 255, 255, 0.75);
+    max-width: 34rem;
+  }
+  .nl-form {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+  }
+  .nl-form input {
+    padding: 0.625rem 0.875rem;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--white);
+    font-size: var(--size-small);
+    min-width: 16rem;
+  }
+  .nl-form button {
+    background: #8fd4b4;
+    color: #08301f;
+    font-weight: 700;
+    font-size: var(--size-small);
+    padding: 0.625rem 1.25rem;
+    border: none;
+    border-radius: var(--radius);
+    cursor: pointer;
+    letter-spacing: 0.02em;
+  }
+  .nl-form button:hover {
+    background: var(--white);
   }
 
-  /* Footer sits on accent — override global focus ring for visibility */
-  a:focus-visible {
+  /* Bottom bar ------------------------------------------------------- */
+  .bottom-bar {
+    background: #08301f;
+    padding-block: var(--space-5);
+  }
+  .bottom-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+  }
+  .legal {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+  }
+  .legal li:not(:first-child)::before {
+    content: "|";
+    color: rgba(255, 255, 255, 0.25);
+    margin-right: var(--space-2);
+  }
+  .legal a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: var(--size-meta);
+  }
+  .legal a:hover {
+    color: var(--white);
+  }
+  .socials {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: var(--space-3);
+  }
+  .socials a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.125rem;
+    height: 2.125rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: var(--radius);
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .socials a:hover {
+    background: var(--white);
+    border-color: var(--white);
+    color: var(--accent);
+  }
+  .copyright {
+    text-align: center;
+    font-size: var(--size-meta);
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: var(--space-5);
+    padding-inline: var(--space-5);
+  }
+
+  /* Footer sits on accent — keep focus rings visible */
+  .site-footer a:focus-visible,
+  .site-footer button:focus-visible,
+  .site-footer input:focus-visible {
     outline-color: var(--white);
   }
 </style>

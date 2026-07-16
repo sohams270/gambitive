@@ -14,6 +14,14 @@ export const SITE = {
   advertiseEmail: "partners@gambitive.com",
   // Set to the production domain to enable Plausible; leave "" to disable.
   plausibleDomain: "",
+  // Social profiles shown in the footer. Update handles when the real
+  // accounts exist; set any to "" to hide its icon.
+  social: {
+    x: "https://x.com/gambitive",
+    linkedin: "https://www.linkedin.com/company/gambitive",
+    facebook: "https://www.facebook.com/gambitive",
+    whatsapp: "https://whatsapp.com/channel/gambitive",
+  },
 } as const;
 
 export const SECTIONS = {
