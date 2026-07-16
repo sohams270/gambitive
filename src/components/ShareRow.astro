@@ -1,0 +1,119 @@
+---
+// Social sharing row. Links use the canonical production URL so shares
+// point at the real site even from previews.
+interface Props {
+  title: string;
+  url: string;
+}
+const { title, url } = Astro.props;
+const e = encodeURIComponent;
+
+const links = [
+  {
+    name: "Share on X",
+    href: `https://twitter.com/intent/tweet?text=${e(title)}&url=${e(url)}`,
+    path: "M18.9 1.2h3.7l-8.2 9.3L24 22.8h-7.6l-5.9-7.7-6.8 7.7H0l8.7-10L-.5 1.2H7.3l5.4 7 6.2-7Zm-1.3 19.5h2L6.2 3.2H4l13.6 17.5Z",
+  },
+  {
+    name: "Share on LinkedIn",
+    href: `https://www.linkedin.com/sharing/share-offsite/?url=${e(url)}`,
+    path: "M20.4 20.4h-3.5v-5.6c0-1.3 0-3-1.9-3-1.9 0-2.1 1.4-2.1 2.9v5.7H9.4V9h3.4v1.6h.1c.5-.9 1.6-1.9 3.4-1.9 3.6 0 4.2 2.4 4.2 5.4v6.3ZM5.3 7.4a2 2 0 1 1 0-4.1 2 2 0 0 1 0 4.1Zm1.8 13H3.6V9h3.5v11.4ZM22.2 0H1.7C.8 0 0 .8 0 1.7v20.5c0 1 .8 1.8 1.7 1.8h20.5c1 0 1.8-.8 1.8-1.8V1.7c0-.9-.8-1.7-1.8-1.7Z",
+  },
+  {
+    name: "Share on Facebook",
+    href: `https://www.facebook.com/sharer/sharer.php?u=${e(url)}`,
+    path: "M24 12a12 12 0 1 0-13.9 11.9v-8.4h-3v-3.5h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.4l-.5 3.5h-2.9v8.4A12 12 0 0 0 24 12Z",
+  },
+  {
+    name: "Share on WhatsApp",
+    href: `https://wa.me/?text=${e(`${title} ${url}`)}`,
+    path: "M17.5 14.4c-.3-.1-1.8-.9-2-1-.3-.1-.5-.1-.7.1-.2.3-.8 1-.9 1.2-.2.2-.3.2-.6.1a7.6 7.6 0 0 1-3.8-3.3c-.3-.5.3-.5.8-1.6.1-.2 0-.4 0-.5l-.9-2.2c-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1 2.9 1.2 3.1c.1.2 2.1 3.2 5.1 4.5 1.9.8 2.6.9 3.6.7.6-.1 1.8-.7 2-1.4.3-.7.3-1.3.2-1.4 0-.2-.3-.3-.6-.4ZM12 21.8a9.7 9.7 0 0 1-5-1.4l-.4-.2-3.7 1 1-3.6-.2-.4a9.8 9.8 0 1 1 8.3 4.6ZM12 .2A11.8 11.8 0 0 0 1.8 17.9L.1 24l6.3-1.6A11.8 11.8 0 1 0 12 .2Z",
+  },
+  {
+    name: "Share by email",
+    href: `mailto:?subject=${e(title)}&body=${e(url)}`,
+    path: "M12 12.7 1.6 5.2A2 2 0 0 1 3 4h18a2 2 0 0 1 1.4 1.2L12 12.7ZM12 15 1 7v11a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V7l-11 8Z",
+  },
+];
+---
+
+<div class="share" aria-label="Share this story">
+  <span class="share-label">Share</span>
+  {
+    links.map((l) => (
+      <a
+        href={l.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={l.name}
+        title={l.name}
+      >
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
+          <path d={l.path} />
+        </svg>
+      </a>
+    ))
+  }
+  <button type="button" class="copy" data-url={url} aria-label="Copy link" title="Copy link">
+    <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+      <path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7" />
+      <path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7" />
+    </svg>
+  </button>
+  <span class="copied" role="status" aria-live="polite"></span>
+</div>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>(".share .copy").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const note = btn.parentElement?.querySelector<HTMLElement>(".copied");
+      try {
+        await navigator.clipboard.writeText(btn.dataset.url ?? "");
+        if (note) note.textContent = "Link copied";
+      } catch {
+        if (note) note.textContent = btn.dataset.url ?? "";
+      }
+      setTimeout(() => note && (note.textContent = ""), 2500);
+    });
+  });
+</script>
+
+<style>
+  .share {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+  .share-label {
+    font-size: var(--size-meta);
+    font-weight: 600;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-right: var(--space-2);
+  }
+  a,
+  .copy {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.125rem;
+    height: 2.125rem;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+  a:hover,
+  .copy:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--white);
+  }
+  .copied {
+    font-size: var(--size-meta);
+    color: var(--accent);
+  }
+</style>

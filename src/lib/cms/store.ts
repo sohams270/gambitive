@@ -65,6 +65,20 @@ async function localCommitPush(message: string, repoPaths: string[]): Promise<st
   }
 }
 
+/** Read a repo file's current contents (deployed snapshot may be stale on Vercel). */
+export async function readFile(repoPath: string): Promise<string | null> {
+  if (onVercel) {
+    const existing = await githubRequest("GET", `/repos/${REPO}/contents/${repoPath}`);
+    if (!existing?.content) return null;
+    return Buffer.from(existing.content, "base64").toString("utf-8");
+  }
+  try {
+    return fs.readFileSync(path.join(process.cwd(), repoPath), "utf-8");
+  } catch {
+    return null;
+  }
+}
+
 export interface FileToSave {
   repoPath: string;
   content: string | Buffer;

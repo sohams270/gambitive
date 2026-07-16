@@ -5,8 +5,12 @@ import NewsletterSignup from "../../components/NewsletterSignup.astro";
 import BrandMark from "../../components/BrandMark.astro";
 import FormattedDate from "../../components/FormattedDate.astro";
 import ArticleCard from "../../components/ArticleCard.astro";
+import ShareRow from "../../components/ShareRow.astro";
+import Comments from "../../components/Comments.astro";
 import { SITE, SECTIONS } from "../../lib/site";
 import { loadUsers } from "../../lib/cms/auth";
+import fs from "node:fs";
+import path from "node:path";
 
 export async function getStaticPaths() {
   const articles = await getCollection("articles", ({ data }) => !data.draft);
@@ -58,6 +62,22 @@ const authorInitials = article.data.author
   .toUpperCase();
 const isHouseAuthor = article.data.author in HOUSE_BIOS;
 
+const canonicalUrl = `${SITE.url}/${section.slug}/${article.id}/`;
+
+// Comments are committed to the repo by /api/comments and baked in here
+// at build time.
+let comments: Array<{ id: string; name: string; text: string; date: string; parentId?: string }> = [];
+try {
+  comments = JSON.parse(
+    fs.readFileSync(
+      path.join(process.cwd(), `src/data/comments/${article.id}.json`),
+      "utf-8",
+    ),
+  );
+} catch {
+  /* no comments yet */
+}
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": article.data.section === "latest" ? "NewsArticle" : "Article",
@@ -97,6 +117,7 @@ const jsonLd = {
       <p class="meta byline">
         By {article.data.author} · <FormattedDate date={article.data.pubDate} />
       </p>
+      <ShareRow title={article.data.title} url={canonicalUrl} />
     </header>
 
     {
@@ -144,6 +165,12 @@ const jsonLd = {
             <p class="author-text">{authorBio}</p>
           </div>
         </aside>
+
+        <div class="share-end">
+          <ShareRow title={article.data.title} url={canonicalUrl} />
+        </div>
+
+        <Comments slug={article.id} section={section.slug} comments={comments} />
       </div>
 
       {
@@ -350,5 +377,8 @@ const jsonLd = {
 
   .prose-width {
     max-width: calc(var(--measure) + 2 * var(--space-5));
+  }
+  .share-end {
+    margin-top: var(--space-5);
   }
 </style>
