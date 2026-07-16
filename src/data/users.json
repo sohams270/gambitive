@@ -5,5 +5,12 @@
     "role": "superadmin",
     "salt": "6e4b445e3f8cb5902e5955076d99517e",
     "passwordHash": "96f832dbe4af7eaf48dc7ce922524b5aca280f7c740dcc41e5f13dc3bec5a6a4af17393a782683d5051577564b3d56b0fe28a0110aec2d9846710fe467fbf77d"
+  },
+  {
+    "username": "gambitive",
+    "name": "Gambitive Desk",
+    "role": "author",
+    "salt": "017e5911e2ae287c387324a56efe1598",
+    "passwordHash": "7e8c8cd0dc795af64a4084844e30ad7d69a37e734ceb68f33d523d37c6a6322ed30b384fe785490eee57244db418c386b2f2f8fda18ddfca13d489080179c6a6"
   }
 ]
