@@ -1,5 +1,6 @@
 ---
 import { SECTIONS } from "../../lib/site";
+import { loadUsers } from "../../lib/cms/auth";
 
 interface Props {
   values?: {
@@ -9,9 +10,9 @@ interface Props {
     author?: string;
     pubDate?: string;
     tldr?: string;
-    authorBio?: string;
     image?: string;
     imageAlt?: string;
+    imageCaption?: string;
     featured?: boolean;
     draft?: boolean;
     body?: string;
@@ -22,6 +23,20 @@ interface Props {
 const { values = {}, submitLabel } = Astro.props;
 const today = new Date().toISOString().slice(0, 10);
 const user = Astro.locals.user;
+
+// Byline options come from the central Authors list, plus the two house
+// bylines. An existing byline on an older post stays selectable.
+const HOUSE_BYLINES = ["Gambitive Staff", "As told to Gambitive"];
+const bylines = [
+  ...new Set(
+    [
+      ...loadUsers().map((u) => u.name),
+      ...HOUSE_BYLINES,
+      ...(values.author ? [values.author] : []),
+    ].filter(Boolean),
+  ),
+];
+const selectedByline = values.author ?? user?.name ?? bylines[0];
 ---
 
 <form method="post" class="admin-form" enctype="multipart/form-data">
@@ -57,7 +72,19 @@ const user = Astro.locals.user;
 
   <div class="field">
     <label for="author">Byline</label>
-    <input id="author" name="author" type="text" required value={values.author ?? user?.name ?? ""} />
+    <p class="hint">
+      Managed centrally in <a href="/admin/authors/">Authors</a> — bios come
+      from there too.
+    </p>
+    <select id="author" name="author" required>
+      {
+        bylines.map((name) => (
+          <option value={name} selected={name === selectedByline}>
+            {name}
+          </option>
+        ))
+      }
+    </select>
   </div>
 
   <div class="field">
@@ -69,18 +96,54 @@ const user = Astro.locals.user;
   <div class="field">
     <label for="image">Feature image {values.image && <span class="hint" style="display:inline">(currently: {values.image})</span>}</label>
     <p class="hint">1200×630 works best. SVG, PNG, JPG, or WebP, up to 3 MB. Leave empty to keep the current image.</p>
-    <input id="image" name="image" type="file" accept=".svg,.png,.jpg,.jpeg,.webp" />
+    <input id="image" name="image" type="file" accept=".svg,.png,.jpg,.jpeg,.webp" data-current={values.image ?? ""} />
   </div>
 
-  <div class="field">
-    <label for="imageAlt">Image alt text</label>
-    <input id="imageAlt" name="imageAlt" type="text" value={values.imageAlt ?? ""} />
+  <div class="row">
+    <div class="field">
+      <label for="imageAlt">Image alt text</label>
+      <input id="imageAlt" name="imageAlt" type="text" value={values.imageAlt ?? ""} />
+    </div>
+    <div class="field">
+      <label for="imageCaption">Image caption <span class="hint" style="display:inline">(optional)</span></label>
+      <p class="hint">Displayed below the feature image.</p>
+      <input id="imageCaption" name="imageCaption" type="text" value={values.imageCaption ?? ""} />
+    </div>
   </div>
 
-  <div class="field">
-    <label for="authorBio">Author bio <span class="hint" style="display:inline">(optional — house bio used otherwise)</span></label>
-    <input id="authorBio" name="authorBio" type="text" value={values.authorBio ?? ""} />
-  </div>
+  <section class="previews" id="previews" hidden aria-label="Image previews">
+    <p class="previews-title">Previews</p>
+    <div class="preview-grid">
+      <figure class="pv pv--desktop">
+        <figcaption>Desktop article</figcaption>
+        <div class="frame frame--desktop">
+          <img data-preview alt="" />
+          <p class="pv-caption" data-caption-preview></p>
+        </div>
+      </figure>
+      <figure class="pv pv--mobile">
+        <figcaption>Mobile</figcaption>
+        <div class="frame frame--mobile">
+          <img data-preview alt="" />
+          <p class="pv-headline" data-title-preview></p>
+        </div>
+      </figure>
+      <figure class="pv pv--card">
+        <figcaption>Card thumbnail</figcaption>
+        <div class="frame frame--card">
+          <img data-preview alt="" />
+          <p class="pv-headline" data-title-preview></p>
+        </div>
+      </figure>
+      <figure class="pv pv--social">
+        <figcaption>Social share card (auto-generated on publish)</figcaption>
+        <div class="frame frame--social">
+          <p class="og-title" data-title-preview></p>
+          <p class="og-meta"><span data-section-preview></span> · Gambitive</p>
+        </div>
+      </figure>
+    </div>
+  </section>
 
   <div class="field">
     <label for="body">Body</label>
@@ -107,10 +170,9 @@ const user = Astro.locals.user;
   import "easymde/dist/easymde.min.css";
   import "@fortawesome/fontawesome-free/css/all.min.css";
 
+  // ---- Body editor -------------------------------------------------
   const textarea = document.getElementById("body") as HTMLTextAreaElement | null;
   if (textarea) {
-    // The editor takes over rendering; drop `required` so the hidden
-    // textarea can't block submission from an unfocusable state.
     textarea.required = false;
 
     const editor = new EasyMDE({
@@ -156,7 +218,6 @@ const user = Astro.locals.user;
       ],
     });
 
-    // Guarantee the textarea carries the editor content on submit.
     textarea.closest("form")?.addEventListener("submit", (event) => {
       const value = editor.value().trim();
       textarea.value = value;
@@ -165,6 +226,62 @@ const user = Astro.locals.user;
         alert("The body is empty.");
       }
     });
+  }
+
+  // ---- Live previews ----------------------------------------------
+  const fileInput = document.getElementById("image") as HTMLInputElement | null;
+  const panel = document.getElementById("previews");
+  if (fileInput && panel) {
+    const imgs = panel.querySelectorAll<HTMLImageElement>("[data-preview]");
+    const titleTargets = panel.querySelectorAll<HTMLElement>("[data-title-preview]");
+    const sectionTarget = panel.querySelector<HTMLElement>("[data-section-preview]");
+    const captionTarget = panel.querySelector<HTMLElement>("[data-caption-preview]");
+    const titleInput = document.getElementById("title") as HTMLInputElement;
+    const sectionSelect = document.getElementById("section") as HTMLSelectElement;
+    const captionInput = document.getElementById("imageCaption") as HTMLInputElement;
+
+    let objectUrl: string | null = null;
+
+    const setImage = (src: string) => {
+      imgs.forEach((img) => (img.src = src));
+      panel.hidden = false;
+    };
+
+    const syncText = () => {
+      const title = titleInput.value.trim() || "Your headline appears here";
+      titleTargets.forEach((el) => (el.textContent = title));
+      if (sectionTarget) {
+        sectionTarget.textContent =
+          sectionSelect.selectedOptions[0]?.textContent?.trim() ?? "";
+      }
+      if (captionTarget) {
+        const caption = captionInput.value.trim();
+        captionTarget.textContent = caption;
+        captionTarget.style.display = caption ? "" : "none";
+      }
+    };
+
+    fileInput.addEventListener("change", () => {
+      const file = fileInput.files?.[0];
+      if (!file) return;
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = URL.createObjectURL(file);
+      setImage(objectUrl);
+      syncText();
+    });
+
+    ["input", "change"].forEach((evt) => {
+      titleInput.addEventListener(evt, syncText);
+      sectionSelect.addEventListener(evt, syncText);
+      captionInput.addEventListener(evt, syncText);
+    });
+
+    // Edit page: show previews for the already-published image.
+    const current = fileInput.dataset.current;
+    if (current) {
+      setImage(current);
+      syncText();
+    }
   }
 </script>
 
@@ -188,5 +305,97 @@ const user = Astro.locals.user;
   }
   .EasyMDEContainer .editor-statusbar {
     color: var(--text-secondary);
+  }
+</style>
+
+<style>
+  .previews {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--bg-muted);
+    padding: var(--space-5);
+  }
+  .previews-title {
+    font-size: var(--size-meta);
+    font-weight: 600;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: var(--space-4);
+  }
+  .preview-grid {
+    display: flex;
+    gap: var(--space-5);
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .pv figcaption {
+    font-size: var(--size-meta);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+  }
+  .frame {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+  .frame img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 1200 / 630;
+    object-fit: cover;
+  }
+  .frame--desktop {
+    width: 300px;
+    padding: 10px;
+  }
+  .frame--mobile {
+    width: 140px;
+    padding: 8px;
+  }
+  .frame--card {
+    width: 200px;
+    padding: 8px;
+  }
+  .pv-caption {
+    font-size: 0.6875rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+  }
+  .pv-headline {
+    font-family: var(--font-serif);
+    font-weight: 640;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    margin-top: 6px;
+  }
+  .frame--mobile .pv-headline {
+    font-size: 0.6875rem;
+  }
+  .frame--social {
+    width: 300px;
+    aspect-ratio: 1200 / 630;
+    background: var(--accent);
+    color: var(--white);
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 10px;
+  }
+  .og-title {
+    font-family: var(--font-serif);
+    font-weight: 640;
+    font-size: 0.9375rem;
+    line-height: 1.25;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .og-meta {
+    font-size: 0.6875rem;
+    color: rgba(255, 255, 255, 0.75);
   }
 </style>

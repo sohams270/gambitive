@@ -18,6 +18,7 @@ const articles = defineCollection({
     updatedDate: z.coerce.date().optional(),
     image: z.string().optional(),
     imageAlt: z.string().optional(),
+    imageCaption: z.string().optional(), // displayed below the feature image
     featured: z.boolean().default(false),
     draft: z.boolean().default(false),
   }),

@@ -4,7 +4,7 @@ import AdminLayout from "../../../layouts/AdminLayout.astro";
 import ArticleForm from "../../../components/admin/ArticleForm.astro";
 import { parseArticleForm } from "../../../lib/cms/article-form";
 import { toMarkdown } from "../../../lib/cms/markdown";
-import { saveFiles, deleteFile, type FileToSave } from "../../../lib/cms/store";
+import { saveFiles, deleteFiles, type FileToSave } from "../../../lib/cms/store";
 import { SECTIONS } from "../../../lib/site";
 
 export const prerender = false;
@@ -38,14 +38,19 @@ if (Astro.request.method === "POST") {
       if (form.get("confirm_slug") !== slug) {
         error = `To delete, type the slug exactly: ${slug}`;
       } else {
-        success = await deleteFile(
-          `src/content/articles/${slug}.md`,
-          `Delete: ${article.data.title}`,
-        );
+        const paths = [`src/content/articles/${slug}.md`];
+        // Remove the uploaded feature image with the post
+        if (article.data.image?.startsWith("/images/articles/")) {
+          paths.push(`public${article.data.image}`);
+        }
+        success = await deleteFiles(paths, `Delete: ${article.data.title}`);
         deleted = true;
       }
     } else {
       const parsed = await parseArticleForm(form, article.data.image);
+      // authorBio left the post form (bios are managed in Authors);
+      // preserve what older posts already carry.
+      parsed.input.authorBio = article.data.authorBio;
       values = parsed.input;
       if (parsed.error) {
         error = parsed.error;

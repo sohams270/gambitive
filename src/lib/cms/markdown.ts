@@ -8,6 +8,7 @@ export interface ArticleInput {
   authorBio?: string;
   image?: string;
   imageAlt?: string;
+  imageCaption?: string;
   featured: boolean;
   draft: boolean;
   body: string;
@@ -44,6 +45,7 @@ export function toMarkdown(input: ArticleInput): string {
   if (input.authorBio?.trim()) lines.push(`authorBio: ${yamlString(input.authorBio.trim())}`);
   if (input.image) lines.push(`image: ${yamlString(input.image)}`);
   if (input.imageAlt?.trim()) lines.push(`imageAlt: ${yamlString(input.imageAlt.trim())}`);
+  if (input.imageCaption?.trim()) lines.push(`imageCaption: ${yamlString(input.imageCaption.trim())}`);
   if (input.featured) lines.push("featured: true");
   if (input.draft) lines.push("draft: true");
   lines.push("---", "", input.body.replace(/\r\n/g, "\n").trim(), "");

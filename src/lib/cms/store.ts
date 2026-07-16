@@ -92,17 +92,21 @@ export async function saveFiles(files: FileToSave[], message: string): Promise<s
   return localCommitPush(message, files.map((f) => f.repoPath));
 }
 
-export async function deleteFile(repoPath: string, message: string): Promise<string> {
+export async function deleteFiles(repoPaths: string[], message: string): Promise<string> {
   if (onVercel) {
-    const sha = await githubSha(repoPath);
-    if (!sha) throw new Error(`File not found in repo: ${repoPath}`);
-    await githubRequest("DELETE", `/repos/${REPO}/contents/${repoPath}`, {
-      message: `${message}\n\nPublished via Gambitive CMS`,
-      sha,
-    });
+    for (const repoPath of repoPaths) {
+      const sha = await githubSha(repoPath);
+      if (!sha) continue; // already gone — nothing to delete
+      await githubRequest("DELETE", `/repos/${REPO}/contents/${repoPath}`, {
+        message: `${message}\n\nPublished via Gambitive CMS`,
+        sha,
+      });
+    }
     return "Deleted and committed — Vercel is deploying the change.";
   }
-  const abs = path.join(process.cwd(), repoPath);
-  if (fs.existsSync(abs)) fs.unlinkSync(abs);
-  return localCommitPush(message, [repoPath]);
+  for (const repoPath of repoPaths) {
+    const abs = path.join(process.cwd(), repoPath);
+    if (fs.existsSync(abs)) fs.unlinkSync(abs);
+  }
+  return localCommitPush(message, repoPaths);
 }

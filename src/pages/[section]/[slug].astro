@@ -6,6 +6,7 @@ import BrandMark from "../../components/BrandMark.astro";
 import FormattedDate from "../../components/FormattedDate.astro";
 import ArticleCard from "../../components/ArticleCard.astro";
 import { SITE, SECTIONS } from "../../lib/site";
+import { loadUsers } from "../../lib/cms/auth";
 
 export async function getStaticPaths() {
   const articles = await getCollection("articles", ({ data }) => !data.draft);
@@ -47,6 +48,7 @@ const HOUSE_BIOS: Record<string, string> = {
 const authorBio =
   article.data.authorBio ??
   HOUSE_BIOS[article.data.author] ??
+  loadUsers().find((u) => u.name === article.data.author)?.bio ??
   `Writes for ${SITE.name} on ${SITE.niche}.`;
 const authorInitials = article.data.author
   .split(/\s+/)
@@ -107,6 +109,9 @@ const jsonLd = {
             height="630"
             loading="eager"
           />
+          {article.data.imageCaption && (
+            <figcaption>{article.data.imageCaption}</figcaption>
+          )}
         </figure>
       )
     }
@@ -207,6 +212,11 @@ const jsonLd = {
   }
   .lead-image img {
     border-radius: var(--radius);
+  }
+  .lead-image figcaption {
+    font-size: var(--size-meta);
+    color: var(--text-secondary);
+    margin-top: var(--space-2);
   }
 
   /* Three-column layout: TL;DR rail, article, related rail ---------- */
