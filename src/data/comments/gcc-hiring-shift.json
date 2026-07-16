@@ -5,5 +5,13 @@
     "email": "reader@example.com",
     "text": "Great analysis — the equity math point especially.",
     "date": "2026-07-16T05:59:52.058Z"
+  },
+  {
+    "id": "c_1784181679218_e6c722",
+    "name": "Second Reader",
+    "email": "second@example.com",
+    "text": "Agreed — and the GCC premium is even higher in Hyderabad.",
+    "date": "2026-07-16T06:01:19.218Z",
+    "parentId": "c_1784181592057_2d35c4"
   }
 ]
